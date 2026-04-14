@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RPA — Nozzle Simulation</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+--bg: #1a1c21;
+--sidebar: #1e2027;
+--panel: #23252d;
+--panel2: #292b34;
+--border: #35383f;
+--border2: #44475a;
+--accent: #5b9cf6;
+--accent2: #3a7bd5;
+--green: #4ec94e;
+--green2: #2ea82e;
+--yellow: #e8c842;
+--red: #e05252;
+--text: #c9ccd4;
+--text2: #8a8d96;
+--text3: #5a5d66;
+--mono: 'Share Tech Mono', monospace;
+--ui: 'Rajdhani', sans-serif;
+--tab-h: 36px;
+--sidebar-w: 168px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--ui); font-size: 13px; height: 100vh; overflow: hidden; }
+
+/* LAYOUT */
+.app { display: flex; height: 100vh; }
+
+/* TOOLBAR */
+.toolbar { position: fixed; top: 0; left: 0; right: 0; height: 34px; background: #14151a; border-bottom: 1px solid #0a0b0d; display: flex; align-items: center; z-index: 100; padding: 0 8px; user-select: none; }
+.toolbar-title { flex: 1; text-align: center; font-family: var(--mono); font-size: 12px; color: var(--text2); letter-spacing: 1px; }
+.menu-bar { display: flex; gap: 2px; }
+.menu-bar span { padding: 4px 10px; font-size: 12px; color: var(--text); cursor: pointer; border-radius: 2px; }
+.menu-bar span:hover { background: var(--panel2); }
+.tb-icons { display: flex; gap: 6px; align-items: center; margin-left: 12px; }
+.tb-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 2px; cursor: pointer; background: var(--panel); color: var(--text2); font-size: 11px; }
+.tb-icon:hover { background: var(--panel2); color: var(--text); }
+.tb-icon.run { background: var(--panel); border-color: var(--green); color: var(--green); font-size:13px; }
+.tb-icon.run:hover { background: var(--green2); border-color: var(--green2); color: #fff; }
+.tb-sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+
+/* SIDEBAR */
+.sidebar { width: var(--sidebar-w); background: var(--sidebar); border-right: 1px solid var(--border); padding-top: 34px; display: flex; flex-direction: column; flex-shrink: 0; }
+.sidebar-item { padding: 10px 14px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text2); border-left: 3px solid transparent; transition: all .15s; letter-spacing: .3px; }
+.sidebar-item:hover { color: var(--text); background: var(--panel); }
+.sidebar-item.active { color: #fff; background: var(--accent2); border-left-color: var(--accent); }
+.sidebar-divider { height: 1px; background: var(--border); margin: 6px 0; }
+
+/* MAIN */
+.main { flex: 1; display: flex; flex-direction: column; padding-top: 34px; overflow: hidden; min-width: 0; }
+
+/* TAB BAR */
+.tab-bar { display: flex; background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.tab { padding: 0 18px; height: var(--tab-h); display: flex; align-items: center; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text2); border-right: 1px solid var(--border); border-bottom: 2px solid transparent; transition: all .15s; letter-spacing: .3px; white-space: nowrap; }
+.tab:hover { color: var(--text); background: var(--panel2); }
+.tab.active { color: #fff; background: var(--bg); border-bottom-color: var(--accent); }
+
+/* CONTENT */
+.content { flex: 1; overflow: hidden; display: flex; }
+.tab-panel { display: none; width: 100%; height: 100%; overflow: hidden; }
+.tab-panel.active { display: flex; }
+
+/* FORM COLS */
+.form-cols { display: flex; width: 100%; height: 100%; overflow: hidden; }
+.form-col { flex: 1; overflow-y: auto; padding: 14px; border-right: 1px solid var(--border); }
+.form-col:last-child { border-right: none; }
+.form-col::-webkit-scrollbar { width: 4px; }
+.form-col::-webkit-scrollbar-track { background: var(--bg); }
+.form-col::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* SECTIONS + FIELDS + RESULTS (unchanged) */
+.section { margin-bottom: 16px; }
+.section-head { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--panel); border: 1px solid var(--border); border-bottom: none; font-size: 12px; font-weight: 600; color: var(--accent); letter-spacing: .8px; text-transform: uppercase; }
+.section-head .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink:0; }
+.section-body { border: 1px solid var(--border); background: var(--panel2); padding: 10px; }
+.field { display: grid; grid-template-columns: 1fr 110px 46px; align-items: center; gap: 6px; margin-bottom: 7px; min-height: 26px; }
+.field:last-child { margin-bottom: 0; }
+.field label { font-size: 12.5px; color: var(--text2); font-family: var(--ui); font-weight: 400; }
+.field input { width: 100%; height: 24px; padding: 0 8px; background: #1a1c21; border: 1px solid var(--border2); color: #d5d8e0; font-family: var(--mono); font-size: 12px; border-radius: 1px; outline: none; transition: border-color .15s; }
+.field input:focus { border-color: var(--accent); background: #1d2028; }
+.field .unit { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.field-radio { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; padding: 3px 6px; border-radius: 1px; }
+.field-radio:hover { background: rgba(255,255,255,.03); }
+.field-radio input[type=radio], .field-radio input[type=checkbox] { width: auto; height: auto; accent-color: var(--accent); cursor: pointer; margin: 0; }
+.field-radio label { font-size: 12.5px; color: var(--text2); cursor: pointer; }
+.res-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,.04); gap: 8px; }
+.res-row:last-child { border-bottom: none; }
+.res-label { font-size: 12px; color: var(--text2); flex: 1; }
+.res-val { font-family: var(--mono); font-size: 12px; color: #e0e4ef; text-align: right; }
+.res-unit { font-family: var(--mono); font-size: 10px; color: var(--text3); min-width: 36px; text-align: right; }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text3); gap: 10px; font-size: 13px; }
+.empty-state svg { opacity: .2; }
+.sub-group { margin-left: 14px; padding-left: 10px; border-left: 2px solid var(--border); margin-bottom: 6px; }
+
+/* NEW: Graphs & Export Section */
+.graphs-row {
+  display: flex;
+  gap: 16px;
+  padding: 20px 14px;
+  flex-wrap: wrap;
+  background: var(--bg);
+}
+.graph-cell {
+  flex: 1;
+  min-width: 280px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.graph-title {
+  padding: 8px 12px;
+  background: var(--panel);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.graph-placeholder {
+  padding: 10px;
+  text-align: center;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0b10;
+}
+.graph-placeholder img {
+  max-width: 100%;
+  max-height: 210px;
+  border: 1px solid var(--border2);
+}
+.export-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--sidebar);
+  border-top: 1px solid var(--border);
+}
+.export-label {
+  font-size: 13px;
+  color: var(--text2);
+  font-weight: 500;
+}
+.export-btn {
+  padding: 8px 16px;
+  background: var(--panel);
+  color: var(--text);
+  text-decoration: none;
+  border-radius: 2px;
+  font-size: 13px;
+  border: 1px solid var(--border2);
+  transition: all 0.15s;
+}
+.export-btn:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* Run button & Status */
+
+.run-btn { flex: 1; height: 34px; background: linear-gradient(135deg, #2e7d32, #388e3c); border: 1px solid #2e7d32; color: #fff; font-family: var(--ui); font-size: 14px; font-weight: 700; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; border-radius: 1px; transition: all .15s; }
+.run-btn:hover { background: linear-gradient(135deg, #388e3c, #43a047); }
+.run-btn:active { transform: translateY(1px); }
+.reset-btn { height: 34px; padding: 0 18px; background: transparent; border: 1px solid var(--border2); color: var(--text2); font-family: var(--ui); font-size: 13px; font-weight: 500; letter-spacing: .5px; cursor: pointer; border-radius: 1px; transition: all .15s; }
+.reset-btn:hover { border-color: var(--text2); color: var(--text); }
+.statusbar { height: 22px; background: #12131a; border-top: 1px solid var(--border); display: flex; align-items: center; padding: 0 12px; gap: 18px; font-family: var(--mono); font-size: 10px; color: var(--text3); flex-shrink: 0; }
+.status-item { display: flex; align-items: center; gap: 5px; }
+.status-dot { width: 5px; height: 5px; border-radius: 50%; }
+.status-dot.green { background: var(--green); box-shadow: 0 0 4px var(--green); }
+.status-dot.gray { background: var(--text3); }
+.status-sep { width: 1px; height: 12px; background: var(--border); }
+</style>
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="toolbar-title">RPA — Nozzle Simulation &middot; Aestus.cfg</div>
+  <div class="tb-icons">
+    <div class="tb-icon">+</div>
+    <div class="tb-icon">O</div>
+    <div class="tb-icon">S</div>
+    <div class="tb-sep"></div>
+    <div class="tb-icon run" title="Run" onclick="document.getElementById('mainForm').submit()">&#9658;</div>
+    <div class="tb-icon" title="Stop">&#9632;</div>
+    <div class="tb-sep"></div>
+    <div class="tb-icon">P</div>
+  </div>
+</div>
+
+<div class="app">
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-item active" onclick="activeSidebar(this, 0)">Input Parameters</div>
+  <div class="sidebar-item" onclick="activeSidebar(this, 2)">Results</div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-item" onclick="activeSidebar(this, 4)">Graph</div>
+  <div class="sidebar-item" onclick="activeSidebar(this, 3)">Species Editor</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="tab-bar">
+    <div class="tab active" onclick="setTab(0)">Engine definition</div>
+    <div class="tab" onclick="setTab(1)">Nozzle flow model</div>
+    <div class="tab" onclick="setTab(2)">Thrust chamber size</div>
+    <div class="tab" onclick="setTab(3)">Thermal analysis</div>
+  </div>
+
+  <form id="mainForm" method="POST" action="/">
+  <div class="vert-main">
+  <div class="content">
+
+    <!-- Existing tabs 0 to 3 (unchanged) - only showing the structure for brevity -->
+    <!-- TAB 0, TAB 1, TAB 2, TAB 3 content is exactly the same as your previous version -->
+    <!-- (I kept them identical so you can just copy-paste the whole file) -->
+<!-- TAB 0: Engine Definition -->
+    <div class="tab-panel active" id="tab-0">
+      <div class="form-cols">
+        <div class="form-col">
+          <div class="section">
+            <div class="section-head"><span class="dot"></span>Propellant &amp; Combustion</div>
+            <div class="section-body">
+              <div class="field">
+                <label>Engine Required thrust</label>
+                <input type="number" step="any" name="thrust" placeholder="10000" value="{{ request.form.get('thrust', '') }}">
+                <span class="unit">N</span>
+              </div>
+              <div class="field">
+                <label>Chamber pressure Pc</label>
+                <input type="number" step="any" name="pressure" placeholder="5468000" value="{{ request.form.get('pressure', '') }}">
+                <span class="unit">Pa</span>
+              </div>
+              <div class="field">
+                <label>Chamber temperature Tc</label>
+                <input type="number" step="any" name="temperature" placeholder="3300" value="{{ request.form.get('temperature', '') }}">
+                <span class="unit">K</span>
+              </div>
+              <div class="field">
+                <label>Specific heat ratio &#947;</label>
+                <input type="number" step="any" name="gamma" placeholder="1.22" value="{{ request.form.get('gamma', '') }}">
+                <span class="unit">&#947;</span>
+              </div>
+              <div class="field">
+                <label>Gas constant R</label>
+                <input type="number" step="any" name="gas_constant" placeholder="355.4" value="{{ request.form.get('gas_constant', '') }}">
+                <span class="unit">J/kg&#183;K</span>
+              </div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-head"><span class="dot"></span>Ambient Conditions</div>
+            <div class="section-body">
+              <div class="field">
+                <label>Design altitude</label>
+                <input type="number" step="any" name="altitude" placeholder="10" value="{{ request.form.get('altitude', '') }}">
+                <span class="unit">km</span>
+              </div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-head"><span class="dot"></span>Structural Parameters</div>
+            <div class="section-body">
+              <div class="field">
+                <label>Wall yield strength &#963;y</label>
+                <input type="number" step="any" name="sy" placeholder="250000000" value="{{ request.form.get('sy', '') }}">
+                <span class="unit">Pa</span>
+              </div>
+              <div class="field">
+                <label> Wall Safety factor SF</label>
+                <input type="number" step="any" name="SF" placeholder="2" value="{{ request.form.get('SF', '') }}">
+                <span class="unit">&#8212;</span>
+              </div>
+            </div>
+          </div>
+        </div><!-- col1 -->
+<!-- Col2: performance results -->
+        <div class="form-col" style="background:#12131a;">
+          {% if result %}
+          <div class="section">
+            <div class="section-head"><span class="dot" style="background:var(--green)"></span>Performance Output</div>
+            <div class="section-body" style="background:#0d0e13;">
+              <div class="res-row"><span class="res-label">Exit velocity ve</span><span class="res-val">{{ "%.2f"|format(result.ve) }}</span><span class="res-unit">m/s</span></div>
+              <div class="res-row"><span class="res-label">Mass flow rate m&#775;</span><span class="res-val">{{ "%.4f"|format(result.m) }}</span><span class="res-unit">kg/s</span></div>
+              <div class="res-row"><span class="res-label">Thrust F</span><span class="res-val">{{ "%.2f"|format(result.F) }}</span><span class="res-unit">N</span></div>
+              <div class="res-row"><span class="res-label">Specific impulse Isp</span><span class="res-val">{{ "%.1f"|format(result.isp) }}</span><span class="res-unit">s</span></div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-head"><span class="dot" style="background:var(--yellow)"></span>Atmosphere at Altitude</div>
+            <div class="section-body" style="background:#0d0e13;">
+              <div class="res-row"><span class="res-label">Altitude h</span><span class="res-val">{{ result.h }}</span><span class="res-unit">m</span></div>
+              <div class="res-row"><span class="res-label">Temperature</span><span class="res-val">{{ "%.2f"|format(result.t) }}</span><span class="res-unit">&#8451;</span></div>
+              <div class="res-row"><span class="res-label">Temperature</span><span class="res-val">{{ "%.2f"|format(result.temp_k) }}</span><span class="res-unit">K</span></div>
+              <div class="res-row"><span class="res-label">Pressure</span><span class="res-val">{{ "%.2f"|format(result.p) }}</span><span class="res-unit">kPa</span></div>
+              <div class="res-row"><span class="res-label">Pressure</span><span class="res-val">{{ "%.2f"|format(result.pressure_pa) }}</span><span class="res-unit">Pa</span></div>
+              <div class="res-row"><span class="res-label">Pressure</span><span class="res-val">{{ "%.6f"|format(result.pressure_mpa) }}</span><span class="res-unit">MPa</span></div>
+              <div class="res-row"><span class="res-label">Density &#961;</span><span class="res-val">{{ "%.4f"|format(result.rho) }}</span><span class="res-unit">kg/m&#179;</span></div>
+            </div>
+          </div>
+          {% else %}
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2"/><path d="M16 24h16M24 16v16" stroke="currentColor" stroke-width="2"/></svg>
+            <div>Run simulation to see results</div>
+          </div>
+          {% endif %}
+        </div>
+<!-- Diagram -->
+        <div class="diagram-panel">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Engine Schematic</div>
+          <div class="diagram-box">
+            <div class="diagram-label">Chamber Geometry</div>
+            <svg viewBox="0 0 300 160" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;">
+              <rect width="300" height="160" fill="#0a0b10"/>
+              <rect x="20" y="38" width="140" height="84" fill="none" stroke="#4a5568" stroke-width="1.5"/>
+              <polygon points="160,38 220,72 220,90 160,122" fill="none" stroke="#4a5568" stroke-width="1.5"/>
+              <line x1="220" y1="72" x2="220" y2="90" stroke="#5b9cf6" stroke-width="2.5"/>
+              <line x1="10" y1="80" x2="290" y2="80" stroke="#1e2027" stroke-width="0.8" stroke-dasharray="5,3"/>
+              <text x="83" y="27" text-anchor="middle" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="8" letter-spacing="1">CYLINDRICAL CHAMBER</text>
+              <line x1="20" y1="147" x2="160" y2="147" stroke="#3a3d45" stroke-width="0.5"/>
+              <line x1="20" y1="143" x2="20" y2="151" stroke="#3a3d45" stroke-width="0.5"/>
+              <line x1="160" y1="143" x2="160" y2="151" stroke="#3a3d45" stroke-width="0.5"/>
+              <text x="90" y="157" text-anchor="middle" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="8">Lc</text>
+              <line x1="160" y1="147" x2="220" y2="147" stroke="#3a3d45" stroke-width="0.5"/>
+              <line x1="220" y1="143" x2="220" y2="151" stroke="#3a3d45" stroke-width="0.5"/>
+              <text x="190" y="157" text-anchor="middle" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="8">Lc</text>
+              <text x="4" y="84" fill="#5b9cf6" font-family="'Share Tech Mono'" font-size="7">Rc</text>
+              <text x="222" y="84" fill="#5b9cf6" font-family="'Share Tech Mono'" font-size="7">Rt</text>
+              <path d="M 155 90 Q 185 102 220 90" fill="none" stroke="#44475a" stroke-width="0.8" stroke-dasharray="3,2"/>
+              <text x="180" y="112" fill="#44475a" font-family="'Share Tech Mono'" font-size="7">R2</text>
+              <path d="M 155 38 Q 188 55 220 72" fill="none" stroke="#44475a" stroke-width="0.8" stroke-dasharray="3,2"/>
+              <text x="182" y="50" fill="#44475a" font-family="'Share Tech Mono'" font-size="7">R1</text>
+              <path d="M 160 110 L 148 100 A 14 14 0 0 1 160 92" fill="none" stroke="#5b9cf6" stroke-width="0.8"/>
+              <text x="130" y="104" fill="#5b9cf6" font-family="'Share Tech Mono'" font-size="7">b</text>
+            </svg>
+          </div>
+          <div class="diagram-box">
+            <div class="diagram-label">Nozzle Geometry (TIC)</div>
+            <svg viewBox="0 0 300 160" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;">
+              <rect width="300" height="160" fill="#0a0b10"/>
+              <path d="M 20 75 Q 55 75 80 70 Q 110 60 150 42 Q 210 20 285 15" fill="none" stroke="#5b9cf6" stroke-width="1.8"/>
+              <path d="M 20 85 Q 55 85 80 90 Q 110 100 150 118 Q 210 140 285 145" fill="none" stroke="#5b9cf6" stroke-width="1.8"/>
+              <line x1="20" y1="70" x2="20" y2="90" stroke="#5b9cf6" stroke-width="2.5"/>
+              <line x1="285" y1="12" x2="285" y2="148" stroke="#4a5568" stroke-width="1.5"/>
+              <line x1="10" y1="80" x2="295" y2="80" stroke="#1e2027" stroke-width="0.8" stroke-dasharray="5,3"/>
+              <text x="20" y="10" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="9" letter-spacing="0.5">NOZZLE CONTOUR</text>
+              <text x="6" y="84" fill="#5b9cf6" font-family="'Share Tech Mono'" font-size="7">Rt</text>
+              <text x="287" y="84" fill="#5b9cf6" font-family="'Share Tech Mono'" font-size="7">Re</text>
+              <path d="M 20 72 A 22 22 0 0 1 42 67" fill="none" stroke="#e8c842" stroke-width="0.8"/>
+              <text x="44" y="63" fill="#e8c842" font-family="'Share Tech Mono'" font-size="7">Tn</text>
+              <path d="M 273 18 A 14 14 0 0 0 284 30" fill="none" stroke="#e8c842" stroke-width="0.8"/>
+              <text x="254" y="17" fill="#e8c842" font-family="'Share Tech Mono'" font-size="7">Te</text>
+              <line x1="20" y1="153" x2="285" y2="153" stroke="#3a3d45" stroke-width="0.5"/>
+              <line x1="20" y1="149" x2="20" y2="157" stroke="#3a3d45" stroke-width="0.5"/>
+              <line x1="285" y1="149" x2="285" y2="157" stroke="#3a3d45" stroke-width="0.5"/>
+              <text x="152" y="159" text-anchor="middle" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="8">Le</text>
+              <text x="55" y="68" fill="#44475a" font-family="'Share Tech Mono'" font-size="7">Rn</text>
+              <text x="15" y="100" fill="#44475a" font-family="'Share Tech Mono'" font-size="7">R0</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div><!-- tab-0 -->
+<!-- TAB 1: Nozzle Flow Model -->
+    <div class="tab-panel" id="tab-1">
+      <div class="form-cols">
+        <div class="form-col">
+          <div class="section">
+            <div class="section-head"><span class="dot"></span>Divergent / Convergent Angles</div>
+            <div class="section-body">
+              <div class="field">
+                <label>Divergent Angle</label>
+                <input type="number" step="any" name="divergent_angle" placeholder="15" value="{{ request.form.get('divergent_angle', '') }}">
+                <span class="unit">deg</span>
+              </div>
+              <div class="field">
+                <label>Convergent angle</label>
+                <input type="number" step="any" name="convergent_a" placeholder="30" value="{{ request.form.get('convergent_a', '') }}">
+                <span class="unit">deg</span>
+              </div>
+              <div class="field">
+                <label>Characteristic length L*</label>
+                <input type="number" step="any" name="length" placeholder="0.5" value="{{ request.form.get('length', '') }}">
+                <span class="unit">m</span>
+              </div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-head"><span class="dot"></span>Bell Nozzle Angles (Rao Method)</div>
+            <div class="section-body">
+              <div class="field">
+                <label>Throat angle for bell nozzle</label>
+                <input type="number" step="any" name="ta" placeholder="25" value="{{ request.form.get('ta', '') }}">
+                <span class="unit">deg</span>
+              </div>
+              <div class="field">
+                <label>Slop angle for bell nozzle</label>
+                <input type="number" step="any" name="sa" placeholder="30" value="{{ request.form.get('sa', '') }}">
+                <span class="unit">deg</span>
+              </div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-head"><span class="dot"></span>Nozzle Type Selection</div>
+            <div class="section-body">
+              <div class="field-radio"><input type="radio" name="nozzle_type" value="conical" id="r_conical"><label for="r_conical">Conical nozzle with half angle:</label></div>
+              <div class="field" style="margin-left:18px;">
+                <label>Throat angle for conical &#920;</label>
+                <input type="number" step="any" name="tha" placeholder="17" value="{{ request.form.get('tha', '') }}">
+                <span class="unit">deg</span>
+              </div>
+              <div class="field-radio" style="margin-top:6px;"><input type="radio" name="nozzle_type" value="bell" id="r_bell" checked><label for="r_bell">Parabolic contour &#8212; fixed Ae/At</label></div>
+              <div class="sub-group">
+                <div class="field-radio"><input type="radio" name="bell_sub" value="tic" id="r_tic" checked><label for="r_tic">Truncated ideal contour (TIC)</label></div>
+                <div class="sub-group">
+                  <div class="field-radio"><input type="radio" name="tic_sub" value="max" id="r_max" checked><label for="r_max">Maximum thrust at fixed Ae/At</label></div>
+                  <div class="field-radio"><input type="radio" name="tic_sub" value="fixed" id="r_fixed"><label for="r_fixed">Fixed nozzle Ae/At and length Le</label></div>
+                  <div class="field" style="margin-left:14px;">
+                    <label>Nozzle length Le/Dt</label>
+                    <input type="number" step="any" value="5.00" style="background:#1a1c21;border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:12px;height:24px;padding:0 8px;">
+                    <span class="unit">&#8212;</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- col1 -->
+        <div class="form-col" style="background:#12131a;">
+          {% if result %}
+          <div class="section">
+            <div class="section-head"><span class="dot" style="background:var(--green)"></span>Flow Properties</div>
+            <div class="section-body" style="background:#0d0e13;">
+              <div class="res-row"><span class="res-label">Exit Mach Me</span><span class="res-val">{{ "%.4f"|format(result.me) }}</span><span class="res-unit">&#8212;</span></div>
+              <div class="res-row"><span class="res-label">Area ratio Ae/At</span><span class="res-val">{{ "%.4f"|format(result.Ar) }}</span><span class="res-unit">&#8212;</span></div>
+              <div class="res-row"><span class="res-label">Nozzle area ratio</span><span class="res-val">{{ "%.4f"|format(result.ar) }}</span><span class="res-unit">&#8212;</span></div>
+              <div class="res-row"><span class="res-label">Stagnation density &#961;0</span><span class="res-val">{{ "%.4f"|format(result.rho0) }}</span><span class="res-unit">kg/m&#179;</span></div>
+              <div class="res-row"><span class="res-label">Throat velocity vt</span><span class="res-val">{{ "%.2f"|format(result.vt) }}</span><span class="res-unit">m/s</span></div>
+              <div class="res-row"><span class="res-label">Throat density &#961;t</span><span class="res-val">{{ "%.4f"|format(result.rhot) }}</span><span class="res-unit">kg/m&#179;</span></div>
+              <div class="res-row"><span class="res-label">Exit pressure pe</span><span class="res-val">{{ "%.2f"|format(result.ep) }}</span><span class="res-unit">Pa</span></div>
+              <div class="res-row"><span class="res-label">Exit temperature Te</span><span class="res-val">{{ "%.2f"|format(result.et) }}</span><span class="res-unit">K</span></div>
+              <div class="res-row"><span class="res-label">Exit velocity ve</span><span class="res-val">{{ "%.2f"|format(result.v_e) }}</span><span class="res-unit">m/s</span></div>
+              <div class="res-row"><span class="res-label">General mass flow m&#775;g</span><span class="res-val">{{ "%.4f"|format(result.mg) }}</span><span class="res-unit">kg/s</span></div>
+              <div class="res-row"><span class="res-label">Choked mass flow m&#775;c</span><span class="res-val">{{ "%.4f"|format(result.mc) }}</span><span class="res-unit">kg/s</span></div>
+              <div class="res-row"><span class="res-label">Mass flow rate m&#775;0</span><span class="res-val">{{ "%.4f"|format(result.m0) }}</span><span class="res-unit">kg/s</span></div>
+            </div>
+          </div>
+          {% else %}
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2"/><path d="M16 24h16M24 16v16" stroke="currentColor" stroke-width="2"/></svg>
+            <div>Run simulation to see flow results</div>
+          </div>
+          {% endif %}
+        </div>
+        <div class="diagram-panel">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Flow Diagrams</div>
+          <div class="diagram-box">
+            <div class="diagram-label">Mach Number Distribution</div>
+            <svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;">
+              <rect width="300" height="150" fill="#0a0b10"/>
+              <line x1="35" y1="10" x2="35" y2="130" stroke="#2a2d35" stroke-width="0.8"/>
+              <line x1="35" y1="130" x2="285" y2="130" stroke="#2a2d35" stroke-width="0.8"/>
+              <line x1="35" y1="105" x2="285" y2="105" stroke="#1a1d24" stroke-width="0.5"/>
+              <line x1="35" y1="80" x2="285" y2="80" stroke="#1a1d24" stroke-width="0.5"/>
+              <line x1="35" y1="55" x2="285" y2="55" stroke="#1a1d24" stroke-width="0.5"/>
+              <line x1="35" y1="30" x2="285" y2="30" stroke="#1a1d24" stroke-width="0.5"/>
+              <path d="M 35 122 Q 100 120 130 80 Q 148 50 175 35 Q 220 15 285 12" fill="none" stroke="#5b9cf6" stroke-width="2"/>
+              <line x1="130" y1="130" x2="130" y2="10" stroke="#e8c842" stroke-width="0.8" stroke-dasharray="4,3"/>
+              <text x="132" y="20" fill="#e8c842" font-family="'Share Tech Mono'" font-size="7">M=1 (Throat)</text>
+              <text x="30" y="108" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="7" text-anchor="end">1</text>
+              <text x="30" y="83" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="7" text-anchor="end">2</text>
+              <text x="30" y="58" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="7" text-anchor="end">3</text>
+              <text x="30" y="33" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="7" text-anchor="end">4</text>
+              <text x="155" y="143" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="7" text-anchor="middle">Nozzle Axial Length</text>
+              <text x="8" y="75" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="7" transform="rotate(-90 8 75)">Mach No.</text>
+            </svg>
+          </div>
+          <div class="diagram-box">
+            <div class="diagram-label">Pressure Distribution</div>
+            <svg viewBox="0 0 300 140" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;">
+              <rect width="300" height="140" fill="#0a0b10"/>
+              <line x1="35" y1="10" x2="35" y2="118" stroke="#2a2d35" stroke-width="0.8"/>
+              <line x1="35" y1="118" x2="285" y2="118" stroke="#2a2d35" stroke-width="0.8"/>
+              <line x1="35" y1="90" x2="285" y2="90" stroke="#1a1d24" stroke-width="0.5"/>
+              <line x1="35" y1="65" x2="285" y2="65" stroke="#1a1d24" stroke-width="0.5"/>
+              <line x1="35" y1="40" x2="285" y2="40" stroke="#1a1d24" stroke-width="0.5"/>
+              <line x1="35" y1="18" x2="285" y2="18" stroke="#1a1d24" stroke-width="0.5"/>
+              <path d="M 35 22 Q 80 24 130 65 Q 160 92 210 108 Q 250 114 285 116" fill="none" stroke="#4ec94e" stroke-width="2"/>
+              <line x1="130" y1="118" x2="130" y2="10" stroke="#e8c842" stroke-width="0.8" stroke-dasharray="4,3"/>
+              <text x="30" y="22" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="7" text-anchor="end">Pc</text>
+              <text x="30" y="118" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="7" text-anchor="end">Pe</text>
+              <text x="155" y="131" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="7" text-anchor="middle">Nozzle Axial Length</text>
+              <text x="8" y="65" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="7" transform="rotate(-90 8 65)">Pressure</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div><!-- tab-1 -->
+<!-- TAB 2: Thrust Chamber Size -->
+    <div class="tab-panel" id="tab-2">
+      <div class="form-cols">
+        <div class="form-col">
+          <div class="section">
+            <div class="section-head"><span class="dot"></span>Thrust Chamber Size</div>
+            <div class="section-body">
+              <div style="padding:4px 0 8px;font-size:12px;color:var(--green);font-family:var(--mono);">&#10003; Thrust chamber matches the specified requirements</div>
+              <div class="field-radio"><input type="radio" name="size_mode" value="thrust" id="sz_thrust" checked><label for="sz_thrust">Engine nominal thrust</label></div>
+              <div class="field-radio"><input type="radio" name="size_mode" value="mdot" id="sz_mdot"><label for="sz_mdot">Engine propellant mass flow rate</label></div>
+              <div class="field-radio"><input type="radio" name="size_mode" value="dt" id="sz_dt"><label for="sz_dt">Chamber throat diameter</label></div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-head"><span class="dot"></span>Chamber Geometry</div>
+            <div class="section-body">
+              <div style="padding:2px 0 6px;font-size:13px;font-weight:600;color:var(--text);">Cylindrical chamber</div>
+              <div class="field">
+                <label>Chamber length Lc or L*</label>
+                <input type="number" step="any" value="0.31" style="background:#1a1c21;border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:12px;height:24px;padding:0 8px;">
+                <span class="unit">m</span>
+              </div>
+              <div class="field-radio"><input type="radio" name="clen" value="lstar" checked><label>Characteristic length L*</label></div>
+              <div class="field-radio"><input type="radio" name="clen" value="lc"><label>Chamber length Lc</label></div>
+              <div style="height:6px;"></div>
+              <div class="field">
+                <label>Contraction area ratio Ac/At</label>
+                <input type="text" placeholder="Specify" style="background:#1a1c21;border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:12px;height:24px;padding:0 8px;">
+                <span class="unit">&#8212;</span>
+              </div>
+              <div class="field">
+                <label>Contraction angle b</label>
+                <input type="number" step="any" value="35" style="background:#1a1c21;border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:12px;height:24px;padding:0 8px;">
+                <span class="unit">deg</span>
+              </div>
+              <div class="field">
+                <label>Rc / R2max</label>
+                <input type="number" step="any" value="1.0000" style="background:#1a1c21;border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:12px;height:24px;padding:0 8px;">
+                <span class="unit">&#8212;</span>
+              </div>
+              <div class="field">
+                <label>Rt / Rc</label>
+                <input type="number" step="any" value="0.8" style="background:#1a1c21;border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:12px;height:24px;padding:0 8px;">
+                <span class="unit">&#8212;</span>
+              </div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-head"><span class="dot"></span>Nozzle Geometry Selection</div>
+            <div class="section-body">
+              <div class="field-radio"><input type="radio" name="ng" value="conical" id="ng_c"><label for="ng_c">Conical nozzle with half angle</label></div>
+              <div class="field-radio" style="margin-left:14px;"><label style="color:var(--text3);">Rt/Rt: 0.382</label></div>
+              <div class="field-radio" style="margin-top:4px;"><input type="radio" name="ng" value="para" id="ng_p"><label for="ng_p">Parabolic contour, fixed Ae/At</label></div>
+              <div class="sub-group">
+                <div class="field-radio"><input type="radio" name="ng_sub" value="tic" id="ng_tic" checked><label for="ng_tic">Truncated ideal contour (TIC)</label></div>
+                <div class="sub-group">
+                  <div class="field-radio"><input type="radio" name="ng_tic_sub" value="max" id="ng_max" checked><label for="ng_max">Maximum thrust at fixed Ae/At</label></div>
+                  <div class="field-radio"><input type="radio" name="ng_tic_sub" value="fixed" id="ng_fixed"><label for="ng_fixed">Fixed nozzle Ae/At and length Le</label></div>
+                </div>
+                <div class="field">
+                  <label>Nozzle length Le/Dt</label>
+                  <input type="number" step="any" value="5.00" style="background:#1a1c21;border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:12px;height:24px;padding:0 8px;">
+                  <span class="unit">&#8212;</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<!-- Geometry Results -->
+        <div class="form-col" style="background:#12131a;">
+          {% if result %}
+          <div class="section">
+            <div class="section-head"><span class="dot" style="background:var(--green)"></span>Geometry Output</div>
+            <div class="section-body" style="background:#0d0e13;">
+              <div class="res-row"><span class="res-label">Throat area At</span><span class="res-val">{{ "%.6f"|format(result.at) }}</span><span class="res-unit">m&#178;</span></div>
+              <div class="res-row"><span class="res-label">Exit area Ae</span><span class="res-val">{{ "%.6f"|format(result.ae) }}</span><span class="res-unit">m&#178;</span></div>
+              <div class="res-row"><span class="res-label">Chamber diameter</span><span class="res-val">{{ "%.2f"|format(result.cd_mm) }}</span><span class="res-unit">mm</span></div>
+              <div class="res-row"><span class="res-label">Chamber length Lc</span><span class="res-val">{{ "%.2f"|format(result.lc_mm) }}</span><span class="res-unit">mm</span></div>
+              <div class="res-row"><span class="res-label">Convergent length</span><span class="res-val">{{ "%.2f"|format(result.conv_mm) }}</span><span class="res-unit">mm</span></div>
+              <div class="res-row"><span class="res-label">Throat diameter Dt</span><span class="res-val">{{ "%.2f"|format(result.dt_mm) }}</span><span class="res-unit">mm</span></div>
+              <div class="res-row"><span class="res-label">Divergent length</span><span class="res-val">{{ "%.2f"|format(result.div_mm) }}</span><span class="res-unit">mm</span></div>
+              <div class="res-row"><span class="res-label">Exit diameter De</span><span class="res-val">{{ "%.2f"|format(result.de_mm) }}</span><span class="res-unit">mm</span></div>
+              <div class="res-row"><span class="res-label">Total length</span><span class="res-val">{{ "%.2f"|format(result.total_mm) }}</span><span class="res-unit">mm</span></div>
+              <div class="res-row"><span class="res-label">Wall thickness s</span><span class="res-val">{{ "%.2f"|format(result.s_mm) }}</span><span class="res-unit">mm</span></div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-head"><span class="dot" style="background:var(--yellow)"></span>Bell Nozzle Geometry</div>
+            <div class="section-body" style="background:#0d0e13;">
+              <div class="res-row"><span class="res-label">r1</span><span class="res-val">{{ "%.2f"|format(result.r1 * 1000) }}</span><span class="res-unit">mm</span></div>
+              <div class="res-row"><span class="res-label">Throat radius rt</span><span class="res-val">{{ "%.2f"|format(result.rt * 1000) }}</span><span class="res-unit">mm</span></div>
+              <div class="res-row"><span class="res-label">Exit radius re</span><span class="res-val">{{ "%.2f"|format(result.re * 1000) }}</span><span class="res-unit">mm</span></div>
+              <div class="res-row"><span class="res-label">Bell length L (Rao)</span><span class="res-val">{{ "%.2f"|format(result.l * 1000) }}</span><span class="res-unit">mm</span></div>
+              <div class="res-row"><span class="res-label">Rn</span><span class="res-val">{{ "%.2f"|format(result.rn * 1000) }}</span><span class="res-unit">mm</span></div>
+              <div class="res-row"><span class="res-label">Re</span><span class="res-val">{{ "%.2f"|format(result.Re * 1000) }}</span><span class="res-unit">mm</span></div>
+              <div class="res-row"><span class="res-label">Throat angle Tn</span><span class="res-val">{{ "%.3f"|format(result.tita_n * 57.2958) }}</span><span class="res-unit">deg</span></div>
+              <div class="res-row"><span class="res-label">Exit angle Te</span><span class="res-val">{{ "%.3f"|format(result.tita_e * 57.2958) }}</span><span class="res-unit">deg</span></div>
+              <div class="res-row"><span class="res-label">Slope at N</span><span class="res-val">{{ "%.5f"|format(result.slope_N) }}</span><span class="res-unit">&#8212;</span></div>
+              <div class="res-row"><span class="res-label">Slope at exit</span><span class="res-val">{{ "%.5f"|format(result.slope_exit) }}</span><span class="res-unit">&#8212;</span></div>
+            </div>
+          </div>
+          {% else %}
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2"/><path d="M16 24h16M24 16v16" stroke="currentColor" stroke-width="2"/></svg>
+            <div>Run simulation to see geometry</div>
+          </div>
+          {% endif %}
+        </div>
+<!-- Nozzle profile + graph -->
+        <div class="diagram-panel">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Generated Plots</div>
+          {% if result %}
+          <div class="diagram-box">
+            <div class="diagram-label">2D Nozzle Contour</div>
+            
+            <div style="padding:5px 10px;font-family:var(--mono);font-size:10px;color:var(--text3);border-top:1px solid var(--border);letter-spacing:.8px;text-transform:uppercase;">bell nozzle profile</div>
+          </div>
+          {% else %}
+          <div class="diagram-box" style="height:160px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-family:var(--mono);font-size:10px;letter-spacing:.8px;">NO DATA</div>
+          {% endif %}
+          <div class="diagram-box">
+            <div class="diagram-label">Annotated Profile</div>
+            <svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;">
+              <rect width="300" height="180" fill="#0a0b10"/>
+              <line x1="15" y1="50" x2="75" y2="50" stroke="#5b9cf6" stroke-width="1.5"/>
+              <line x1="75" y1="50" x2="105" y2="70" stroke="#5b9cf6" stroke-width="1.5"/>
+              <line x1="15" y1="130" x2="75" y2="130" stroke="#5b9cf6" stroke-width="1.5"/>
+              <line x1="75" y1="130" x2="105" y2="110" stroke="#5b9cf6" stroke-width="1.5"/>
+              <path d="M 105 70 Q 140 58 195 46 Q 240 37 285 35" fill="none" stroke="#5b9cf6" stroke-width="1.5"/>
+              <path d="M 105 110 Q 140 122 195 134 Q 240 143 285 145" fill="none" stroke="#5b9cf6" stroke-width="1.5"/>
+              <line x1="105" y1="70" x2="105" y2="110" stroke="#5b9cf6" stroke-width="2"/>
+              <line x1="285" y1="32" x2="285" y2="148" stroke="#4a5568" stroke-width="1.5"/>
+              <line x1="10" y1="90" x2="292" y2="90" stroke="#1a1d24" stroke-width="0.8" stroke-dasharray="5,3"/>
+<!-- dim lines -->
+              <line x1="15" y1="160" x2="75" y2="160" stroke="#3a3d45" stroke-width="0.5"/>
+              <text x="45" y="170" text-anchor="middle" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="7">Lc</text>
+              <line x1="105" y1="160" x2="285" y2="160" stroke="#3a3d45" stroke-width="0.5"/>
+              <text x="195" y="170" text-anchor="middle" fill="#5a5d66" font-family="'Share Tech Mono'" font-size="7">Le</text>
+<!-- radius lines -->
+              <line x1="105" y1="90" x2="105" y2="70" stroke="#44475a" stroke-width="0.5" stroke-dasharray="2,2"/>
+              <text x="107" y="68" fill="#e8c842" font-family="'Share Tech Mono'" font-size="7">Rt</text>
+              <line x1="285" y1="90" x2="285" y2="35" stroke="#44475a" stroke-width="0.5" stroke-dasharray="2,2"/>
+              <text x="269" y="33" fill="#e8c842" font-family="'Share Tech Mono'" font-size="7">Re</text>
+              <line x1="15" y1="90" x2="15" y2="50" stroke="#44475a" stroke-width="0.5" stroke-dasharray="2,2"/>
+              <text x="0" y="48" fill="#e8c842" font-family="'Share Tech Mono'" font-size="7">Rc</text>
+              <path d="M 75 130 A 18 18 0 0 0 90 118" fill="none" stroke="#5b9cf6" stroke-width="0.8"/>
+              <text x="85" y="136" fill="#5b9cf6" font-family="'Share Tech Mono'" font-size="7">b</text>
+              <path d="M 105 108 A 14 14 0 0 1 120 101" fill="none" stroke="#e8c842" stroke-width="0.8"/>
+              <text x="120" y="108" fill="#e8c842" font-family="'Share Tech Mono'" font-size="7">Tn</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div><!-- tab-2 -->
+<!-- TAB 3: Thermal Analysis -->
+    <div class="tab-panel" id="tab-3">
+      <div class="form-cols">
+        <div class="form-col">
+          <div class="section">
+            <div class="section-head"><span class="dot"></span>Thermal Analysis</div>
+            <div class="section-body">
+              <p style="color:var(--text3);font-size:12px;padding:8px 4px 12px;">Thermal wall analysis uses computed flow properties. Run the simulation first to populate values.</p>
+              {% if result %}
+              <div class="res-row"><span class="res-label">Chamber temp Tc</span><span class="res-val">{{ "%.2f"|format(result.temp_k) }}</span><span class="res-unit">K</span></div>
+              <div class="res-row"><span class="res-label">Exit temperature Te</span><span class="res-val">{{ "%.2f"|format(result.et) }}</span><span class="res-unit">K</span></div>
+              <div class="res-row"><span class="res-label">Throat velocity vt</span><span class="res-val">{{ "%.2f"|format(result.vt) }}</span><span class="res-unit">m/s</span></div>
+              <div class="res-row"><span class="res-label">Exit pressure pe</span><span class="res-val">{{ "%.2f"|format(result.ep) }}</span><span class="res-unit">Pa</span></div>
+              <div style="height:12px;"></div>
+              <p style="color:var(--text3);font-size:11px;font-family:var(--mono);">Wall material analysis &amp; thermal mapping not yet configured in this build.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="form-col" style="background:#12131a;">
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2"/><path d="M16 32s4-8 16-8" stroke="currentColor" stroke-width="2"/></svg>
+            <div>Thermal model not configured</div>
+          </div>
+        </div>
+        <div class="diagram-panel">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Thermal Map</div>
+          <div class="diagram-box" style="height:180px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-family:var(--mono);font-size:10px;letter-spacing:.8px;">NO THERMAL DATA</div>
+        </div>
+      </div>
+    </div><!-- tab-3 -->
+  </div><!-- content -->
+<!-- Run Buttons -->
+  <div class="run-btn-row">
+    <button type="submit" class="run-btn">&#9658; Run Simulation</button>
+    <button type="reset" class="reset-btn">Reset Inputs</button>
+  </div>
+  </div><!-- vert-main -->
+  {% if error %}
+  <div style="background:#3d1a1a;border:1px solid var(--red);color:#f08080;padding:8px 14px;font-family:var(--mono);font-size:12px;margin:10px 14px 0;">
+    &#9888; {{ error }}
+  </div>
+  {% endif %}
+  </form>
+<!-- Status Bar -->
+  <div class="statusbar">
+    {% if result %}
+    <div class="status-item"><div class="status-dot green"></div>Simulation complete</div>
+    <div class="status-sep"></div>
+    <div class="status-item">F = {{ "%.1f"|format(result.F) }} N</div>
+    <div class="status-sep"></div>
+    <div class="status-item">Isp = {{ "%.1f"|format(result.isp) }} s</div>
+    <div class="status-sep"></div>
+    <div class="status-item">Me = {{ "%.3f"|format(result.me) }}</div>
+    <div class="status-sep"></div>
+    <div class="status-item">Dt = {{ "%.1f"|format(result.dt_mm) }} mm</div>
+    <div class="status-sep"></div>
+    <div class="status-item">De = {{ "%.1f"|format(result.de_mm) }} mm</div>
+    {% else %}
+    <div class="status-item"><div class="status-dot gray"></div>Ready &mdash; enter parameters and run simulation</div>
+    {% endif %}
+  </div>
+    <!-- TAB 4: Graph & Export (NEW) -->
+    <div class="tab-panel" id="tab-4">
+      <div class="form-cols">
+        <div class="form-col" style="flex:1; border-right:none;">
+          {% if result %}
+          <div class="graphs-row">
+            <div class="graph-cell">
+              <div class="graph-title">3D Plot</div>
+              <div class="graph-placeholder">
+                <img src="{{ result['3d_plot'] }}" alt="3D Plot">
+              </div>
+            </div>
+            <div class="graph-cell">
+              <div class="graph-title">2D Profile</div>
+              <div class="graph-placeholder">
+                <img src="{{ result['2d_plot'] }}" alt="2D Plot">
+              </div>
+            </div>
+            <div class="graph-cell">
+              <div class="graph-title">Geometry</div>
+              <div class="graph-placeholder">
+                <img src="{{ result['geo_plot'] }}" alt="Geometry Plot">
+              </div>
+            </div>
+            <div class="graph-cell">
+              <div class="graph-title">Conical</div>
+              <div class="graph-placeholder">
+                <img src="{{ result['coni_plot'] }}" alt="Conical Plot">
+              </div>
+            </div>
+          </div>
+
+          <div class="export-row">
+            <span class="export-label">Export</span>
+            <a class="export-btn" href="{{ result.txt_file }}" download>📄 CAD TXT</a>
+            <a class="export-btn" href="{{ result.excel_file }}" download>📊 CAD Excel</a>
+            <a class="export-btn" href="{{ result.result_exl }}" download>📈 Results Excel</a>
+          </div>
+          {% else %}
+          <div class="empty-state" style="height:100%;">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2"/><path d="M16 24h16M24 16v16" stroke="currentColor" stroke-width="2"/></svg>
+            <div>Run simulation first to generate graphs &amp; export files</div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div><!-- content -->
+
+  </div><!-- vert-main -->
+  </form>
+
+  <!-- Status Bar -->
+  <div class="statusbar">
+    {% if result %}
+    <div class="status-item"><div class="status-dot green"></div>Simulation complete</div>
+    <div class="status-sep"></div>
+    <div class="status-item">F = {{ "%.1f"|format(result.F) }} N</div>
+    <div class="status-sep"></div>
+    <div class="status-item">Isp = {{ "%.1f"|format(result.isp) }} s</div>
+    <div class="status-sep"></div>
+    <div class="status-item">Me = {{ "%.3f"|format(result.me) }}</div>
+    <div class="status-sep"></div>
+    <div class="status-item">Dt = {{ "%.1f"|format(result.dt_mm) }} mm</div>
+    <div class="status-sep"></div>
+    <div class="status-item">De = {{ "%.1f"|format(result.de_mm) }} mm</div>
+    {% else %}
+    <div class="status-item"><div class="status-dot gray"></div>Ready &mdash; enter parameters and run simulation</div>
+    {% endif %}
+  </div>
+</div><!-- main -->
+</div><!-- app -->
+
+<script>
+const tabs = document.querySelectorAll('.tab');
+const panels = document.querySelectorAll('.tab-panel');
+const sideItems = document.querySelectorAll('.sidebar-item');
+
+function setTab(i) {
+  tabs.forEach((t, idx) => t.classList.toggle('active', idx === i));
+  panels.forEach((p, idx) => p.classList.toggle('active', idx === i));
+  sessionStorage.setItem('nozzle_tab', i);
+}
+
+function activeSidebar(el, tabIndex) {
+  sideItems.forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  setTab(tabIndex);
+}
+
+// Restore tab on reload
+window.addEventListener('load', () => {
+  const saved = sessionStorage.getItem('nozzle_tab');
+  if (saved !== null) setTab(parseInt(saved));
+});
+
+// Save active tab before submit
+document.getElementById('mainForm').addEventListener('submit', () => {
+  const active = [...tabs].findIndex(t => t.classList.contains('active'));
+  sessionStorage.setItem('nozzle_tab', active);
+});
+</script>
+</body>
+</html>

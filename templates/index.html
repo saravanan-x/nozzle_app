@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>RPA — Nozzle Simulation</title>
+<title>Nozzle design | Simulate</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
 <style>
 :root {
 --bg: #1a1c21;
@@ -179,13 +180,105 @@ body { background: var(--bg); color: var(--text); font-family: var(--ui); font-s
 .status-dot.green { background: var(--green); box-shadow: 0 0 4px var(--green); }
 .status-dot.gray { background: var(--text3); }
 .status-sep { width: 1px; height: 12px; background: var(--border); }
+.viewer {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+  background: #0b0d12;
+}
+
+.viewer-toolbar {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  z-index: 10;
+}
+
+.viewer-toolbar button {
+  background: #1f2430;
+  color: #fff;
+  border: 1px solid #444;
+  padding: 6px 12px;
+  margin-left: 5px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.viewer-toolbar button:hover {
+  background: #2f3545;
+}
+
+.viewer-canvas {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.viewer-canvas img {
+  max-width: none;
+  max-height: none;
+  cursor: grab;
+}
+
+.clickable-img {
+  cursor: zoom-in;
+  transition: 0.2s;
+}
+
+.clickable-img:hover {
+  transform: scale(1.03);
+}
+.viewer-canvas img {
+  transform-origin: 0 0; /* IMPORTANT */
+  transition: transform 0.05s linear;
+}
+.thermal-img-grid {
+  display: flex;
+  flex-direction: column !important;   /* 🔥 FORCE COLUMN */
+  gap: 12px;
+  width: 100%;
+}
+
+.thermal-img-box {
+  width: 100%;
+  background: #0f1117;
+  border: 1px solid #2a2d36;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.thermal-img-box img {
+  width: 100%;
+  height: 200px;
+  object-fit: contain;
+  display: block;
+  cursor: zoom-in;
+}
+
+.img-title {
+  font-size: 10px;
+  color: var(--text3);
+  font-family: var(--mono);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.form-col .thermal-img-grid {
+  flex-direction: column !important;
+}
+
 </style>
 </head>
 <body>
 
 <!-- TOOLBAR -->
 <div class="toolbar">
-  <div class="toolbar-title">RPA — Nozzle Simulation &middot; Aestus.cfg</div>
+  <div class="menu-bar">Nozzle Simulator</div>
+  <div class="toolbar-title">Nozzle Design &middot; calc &middot; Simulate </div>
   <div class="tb-icons">
     <div class="tb-icon">+</div>
     <div class="tb-icon">O</div>
@@ -205,7 +298,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--ui); font-s
   <div class="sidebar-item" onclick="activeSidebar(this, 2)">Results</div>
   <div class="sidebar-divider"></div>
   <div class="sidebar-item" onclick="activeSidebar(this, 4)">Graph</div>
-  <div class="sidebar-item" onclick="activeSidebar(this, 3)">Species Editor</div>
+  <div class="sidebar-item" onclick="activeSidebar(this, 3)">Flow Analysis</div>
 </div>
 
 <!-- MAIN -->
@@ -214,16 +307,12 @@ body { background: var(--bg); color: var(--text); font-family: var(--ui); font-s
     <div class="tab active" onclick="setTab(0)">Engine definition</div>
     <div class="tab" onclick="setTab(1)">Nozzle flow model</div>
     <div class="tab" onclick="setTab(2)">Thrust chamber size</div>
-    <div class="tab" onclick="setTab(3)">Thermal analysis</div>
+    <div class="tab" onclick="setTab(3)">Final analysis</div>
   </div>
 
   <form id="mainForm" method="POST" action="/">
   <div class="vert-main">
   <div class="content">
-
-    <!-- Existing tabs 0 to 3 (unchanged) - only showing the structure for brevity -->
-    <!-- TAB 0, TAB 1, TAB 2, TAB 3 content is exactly the same as your previous version -->
-    <!-- (I kept them identical so you can just copy-paste the whole file) -->
 <!-- TAB 0: Engine Definition -->
     <div class="tab-panel active" id="tab-0">
       <div class="form-cols">
@@ -452,6 +541,8 @@ body { background: var(--bg); color: var(--text); font-family: var(--ui); font-s
               <div class="res-row"><span class="res-label">General mass flow m&#775;g</span><span class="res-val">{{ "%.4f"|format(result.mg) }}</span><span class="res-unit">kg/s</span></div>
               <div class="res-row"><span class="res-label">Choked mass flow m&#775;c</span><span class="res-val">{{ "%.4f"|format(result.mc) }}</span><span class="res-unit">kg/s</span></div>
               <div class="res-row"><span class="res-label">Mass flow rate m&#775;0</span><span class="res-val">{{ "%.4f"|format(result.m0) }}</span><span class="res-unit">kg/s</span></div>
+              <div class="res-row"><span class="res-label">Final Thrust F</span><span class="res-val">{{ "%.2f"|format(result.F) }}</span><span class="res-unit">N</span></div>
+
             </div>
           </div>
           {% else %}
@@ -676,13 +767,55 @@ body { background: var(--bg); color: var(--text); font-family: var(--ui); font-s
               <p style="color:var(--text3);font-size:11px;font-family:var(--mono);">Wall material analysis &amp; thermal mapping not yet configured in this build.</p>
               {% endif %}
             </div>
+
+            <div class="section-head"><span class="dot"></span>Flow Analysis</div>
+            <div class="section-body">
+              <p style="color:var(--text3);font-size:12px;padding:8px 4px 12px;">TFlow analysis uses computed flow properties. Run the simulation first to populate values.</p>
+              {% if result %}
+              <div class="res-row"><span class="res-label">Nozzle Area Ratio</span><span class="res-val">{{ "%.2f"|format(result.ar) }}</span><span class="res-unit">K</span></div>
+              <div class="res-row"><span class="res-label">Throat Velocity</span><span class="res-val">{{ "%.2f"|format(result.vt) }}</span><span class="res-unit">K</span></div>
+              <div class="res-row"><span class="res-label">Exit Mach vt</span><span class="res-val">{{ "%.2f"|format(result.me) }}</span><span class="res-unit">m/s</span></div>
+              <div class="res-row"><span class="res-label">Exit Pressure</span><span class="res-val">{{ "%.2f"|format(result.ep) }}</span><span class="res-unit">Pa</span></div>
+              <div class="res-row"><span class="res-label">Exit Temperature</span><span class="res-val">{{ "%.2f"|format(result.et) }}</span><span class="res-unit">Pa</span></div>
+              <div class="res-row"><span class="res-label">Exit Velocity</span><span class="res-val">{{ "%.2f"|format(result.v_e) }}</span><span class="res-unit">Pa</span></div>
+              <div class="res-row"><span class="res-label">Specific impulse</span><span class="res-val">{{ "%.2f"|format(result.isp) }}</span><span class="res-unit">Pa</span></div>
+              <div class="res-row"><span class="res-label">Mass Flow Rate</span><span class="res-val">{{ "%.2f"|format(result.m0) }}</span><span class="res-unit">Pa</span></div>
+              <div class="res-row"><span class="res-label">Final Thrust</span><span class="res-val">{{ "%.2f"|format(result.F) }}</span><span class="res-unit">Pa</span></div>
+              <div style="height:12px;"></div>
+              <p style="color:var(--text3);font-size:11px;font-family:var(--mono);">Wall material analysis &amp; thermal mapping not yet configured in this build.</p>
+              {% endif %}
+            </div>
+
           </div>
         </div>
         <div class="form-col" style="background:#12131a;">
-          <div class="empty-state">
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2"/><path d="M16 32s4-8 16-8" stroke="currentColor" stroke-width="2"/></svg>
-            <div>Thermal model not configured</div>
+        <div class="diagram-panel">
+
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">
+            Thermal / Flow Visualization
           </div>
+
+          {% if result %}
+          <div class="thermal-img-grid">
+
+            <div class="thermal-img-box">
+              <div class="img-title">3D Flow</div>
+              <img src="{{ result['2d_plot'] }}" class="clickable-img">
+            </div>
+
+            <div class="thermal-img-box">
+              <div class="img-title">2D Profile</div>
+              <img src="{{ result['bell_cfd_plot'] }}" class="clickable-img">
+            </div>
+
+          </div>
+          {% else %}
+          <div class="diagram-box" style="height:180px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-family:var(--mono);font-size:10px;">
+            NO DATA AVAILABLE
+          </div>
+          {% endif %}
+
+        </div>
         </div>
         <div class="diagram-panel">
           <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Thermal Map</div>
@@ -722,52 +855,68 @@ body { background: var(--bg); color: var(--text); font-family: var(--ui); font-s
     {% endif %}
   </div>
     <!-- TAB 4: Graph & Export (NEW) -->
-    <div class="tab-panel" id="tab-4">
-      <div class="form-cols">
-        <div class="form-col" style="flex:1; border-right:none;">
-          {% if result %}
-          <div class="graphs-row">
-            <div class="graph-cell">
-              <div class="graph-title">3D Plot</div>
-              <div class="graph-placeholder">
-                <img src="{{ result['3d_plot'] }}" alt="3D Plot">
-              </div>
-            </div>
-            <div class="graph-cell">
-              <div class="graph-title">2D Profile</div>
-              <div class="graph-placeholder">
-                <img src="{{ result['2d_plot'] }}" alt="2D Plot">
-              </div>
-            </div>
-            <div class="graph-cell">
-              <div class="graph-title">Geometry</div>
-              <div class="graph-placeholder">
-                <img src="{{ result['geo_plot'] }}" alt="Geometry Plot">
-              </div>
-            </div>
-            <div class="graph-cell">
-              <div class="graph-title">Conical</div>
-              <div class="graph-placeholder">
-                <img src="{{ result['coni_plot'] }}" alt="Conical Plot">
-              </div>
+  <div class="tab-panel" id="tab-4">
+    <div class="form-cols">
+      <div class="form-col" style="flex:1; border-right:none;">
+        {% if result %}
+        <div class="graphs-row">
+
+          <div class="graph-cell">
+            <div class="graph-title">3D Plot</div>
+            <div class="graph-placeholder">
+              <img src="{{ result['3d_plot'] }}" class="clickable-img">
             </div>
           </div>
 
-          <div class="export-row">
-            <span class="export-label">Export</span>
-            <a class="export-btn" href="{{ result.txt_file }}" download>📄 CAD TXT</a>
-            <a class="export-btn" href="{{ result.excel_file }}" download>📊 CAD Excel</a>
-            <a class="export-btn" href="{{ result.result_exl }}" download>📈 Results Excel</a>
+          <div class="graph-cell">
+            <div class="graph-title">2D Profile</div>
+            <div class="graph-placeholder">
+              <img src="{{ result['2d_plot'] }}" class="clickable-img">
+            </div>
           </div>
-          {% else %}
-          <div class="empty-state" style="height:100%;">
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2"/><path d="M16 24h16M24 16v16" stroke="currentColor" stroke-width="2"/></svg>
-            <div>Run simulation first to generate graphs &amp; export files</div>
+
+          <div class="graph-cell">
+            <div class="graph-title">Geometry</div>
+            <div class="graph-placeholder">
+              <img src="{{ result['geo_plot'] }}" class="clickable-img">
+            </div>
           </div>
-          {% endif %}
+
+          <div class="graph-cell">
+            <div class="graph-title">Conical</div>
+            <div class="graph-placeholder">
+              <img src="{{ result['coni_plot'] }}" class="clickable-img">
+            </div>
+          </div>
+
+          <!-- <div class="graph-cell">
+            <div class="graph-title">Conical</div>
+            <div class="graph-placeholder">
+              <img src="{{ result['bell_cfd_plot'] }}" class="clickable-img">
+            </div>
+          </div> -->
+
         </div>
+
+        <div class="export-row">
+          <span class="export-label">Export</span>
+          <a class="export-btn" href="{{ result.txt_file }}" download>📄 CAD TXT</a>
+          <a class="export-btn" href="{{ result.excel_file }}" download>📊 CAD Excel</a>
+          <a class="export-btn" href="{{ result.result_exl }}" download>📈 Results Excel</a>
+        </div>
+
+        {% else %}
+        <div class="empty-state" style="height:100%;">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2"/>
+            <path d="M16 24h16M24 16v16" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <div>Run simulation first to generate graphs &amp; export files</div>
+        </div>
+        {% endif %}
       </div>
     </div>
+  </div>
 
   </div><!-- content -->
 
@@ -794,6 +943,19 @@ body { background: var(--bg); color: var(--text); font-family: var(--ui); font-s
   </div>
 </div><!-- main -->
 </div><!-- app -->
+
+<div id="imgViewer" class="viewer">
+  <div class="viewer-toolbar">
+    <button onclick="zoomIn()">+</button>
+    <button onclick="zoomOut()">−</button>
+    <button onclick="resetZoom()">Reset</button>
+    <button onclick="closeViewer()">✕</button>
+  </div>
+
+  <div id="viewerCanvas" class="viewer-canvas">
+    <img id="viewerImg">
+  </div>
+</div>
 
 <script>
 const tabs = document.querySelectorAll('.tab');
@@ -823,6 +985,105 @@ document.getElementById('mainForm').addEventListener('submit', () => {
   const active = [...tabs].findIndex(t => t.classList.contains('active'));
   sessionStorage.setItem('nozzle_tab', active);
 });
+
+//img viewer
+let scale = 1;
+let startX = 0, startY = 0;
+let translateX = 0, translateY = 0;
+let isDragging = false;
+
+const viewer = document.getElementById("imgViewer");
+const img = document.getElementById("viewerImg");
+
+// OPEN VIEWER
+document.querySelectorAll(".clickable-img").forEach(el => {
+  el.addEventListener("click", () => {
+    viewer.style.display = "block";
+    img.src = el.src;
+
+    // reset state
+    scale = 1;
+    translateX = 0;
+    translateY = 0;
+    updateTransform();
+  });
+});
+
+// APPLY TRANSFORM
+function updateTransform() {
+  img.style.transform =
+    `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+}
+
+// ZOOM FUNCTIONS
+function zoomIn() {
+  scale *= 1.2;
+  updateTransform();
+}
+
+function zoomOut() {
+  scale /= 1.2;
+  updateTransform();
+}
+
+function resetZoom() {
+  scale = 1;
+  translateX = 0;
+  translateY = 0;
+  updateTransform();
+}
+
+// MOUSE WHEEL ZOOM (ZOOM AT CURSOR)
+img.addEventListener("wheel", (e) => {
+  e.preventDefault();
+
+  const rect = img.getBoundingClientRect();
+  const offsetX = e.clientX - rect.left;
+  const offsetY = e.clientY - rect.top;
+
+  const zoom = e.deltaY < 0 ? 1.1 : 0.9;
+
+  translateX -= offsetX * (zoom - 1);
+  translateY -= offsetY * (zoom - 1);
+
+  scale *= zoom;
+  updateTransform();
+});
+
+// DRAG (PAN)
+img.addEventListener("mousedown", (e) => {
+  isDragging = true;
+  startX = e.clientX - translateX;
+  startY = e.clientY - translateY;
+  img.style.cursor = "grabbing";
+});
+
+window.addEventListener("mousemove", (e) => {
+  if (!isDragging) return;
+
+  translateX = e.clientX - startX;
+  translateY = e.clientY - startY;
+  updateTransform();
+});
+
+window.addEventListener("mouseup", () => {
+  isDragging = false;
+  img.style.cursor = "grab";
+});
+
+// CLOSE VIEWER
+function closeViewer() {
+  viewer.style.display = "none";
+}
+
+// DOUBLE CLICK RESET
+img.addEventListener("dblclick", resetZoom);
+
+// CLICK OUTSIDE CLOSE
+viewer.addEventListener("click", (e) => {
+  if (e.target === viewer) closeViewer();
+});
+
 </script>
 </body>
 </html>

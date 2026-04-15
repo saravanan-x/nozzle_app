@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rocket Nozzle Design</title>
+
+<!-- MathJax for formulas -->
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.header {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg,#0F2027,#203A43,#2C5364);
+}
+
+.header h1 {
+  color: #4FC3F7;
+  margin: 0;
+}
+
+.section {
+  padding: 20px;
+}
+
+h2 {
+  color: #38bdf8;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 5px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.table th, .table td {
+  border: 1px solid #334155;
+  padding: 10px;
+  text-align: left;
+}
+
+.table th {
+  background: #1e293b;
+}
+
+.formula {
+  background: #020617;
+  padding: 10px;
+  border-left: 4px solid #38bdf8;
+  margin: 10px 0;
+  overflow-x: auto;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h1>Rocket Nozzle Design</h1>
+  <p>Flow Calculations • Simulation • Geometry</p>
+</div>
+
+<div class="section">
+
+<h2>Given Parameters</h2>
+<table class="table">
+<tr><th>Parameter</th><th>Variable</th><th>Parameter</th><th>Variable</th></tr>
+<tr><td>Thrust</td><td>F</td><td>Chamber Temp</td><td>Tc</td></tr>
+<tr><td>Chamber Pressure</td><td>Pc</td><td>Specific Heat Ratio</td><td>γ</td></tr>
+<tr><td>Exit Pressure</td><td>Pe</td><td>Gas Constant</td><td>R</td></tr>
+</table>
+
+<h2>Flow & Area Dynamics</h2>
+
+<div class="formula">
+$$ V_e = \sqrt{\frac{2\gamma}{\gamma - 1} \cdot R T_c \cdot \left(1 - \left(\frac{P_e}{P_c}\right)^{\frac{\gamma - 1}{\gamma}}\right)} $$
+</div>
+
+<div class="formula">
+$$ M_e = \sqrt{\frac{2}{\gamma - 1} \left[ \left(\frac{P_c}{P_e}\right)^{\frac{\gamma - 1}{\gamma}} - 1 \right]} $$
+</div>
+
+<div class="formula">
+$$ \dot{m} = \frac{F}{V_e} $$
+</div>
+
+<div class="formula">
+$$ \frac{A_e}{A_t} = \frac{1}{M_e} \left[ \frac{1 + \frac{\gamma - 1}{2} M_e^2}{\frac{\gamma + 1}{2}} \right]^{\frac{\gamma + 1}{2(\gamma - 1)}} $$
+</div>
+
+<div class="formula">
+$$ A_t = \frac{\dot{m}}{P_c} \cdot \sqrt{\frac{R T_c}{\gamma} \cdot \left(\frac{\gamma + 1}{2}\right)^{\frac{\gamma + 1}{2(\gamma - 1)}}} $$
+</div>
+
+<div class="formula">
+$$ d_t = \sqrt{\frac{4A_t}{\pi}} $$
+</div>
+
+<div class="formula">
+$$ d_e = \sqrt{\frac{4A_e}{\pi}} $$
+</div>
+
+<h2>Geometry & Structural Design</h2>
+
+<div class="formula">$$ d_c = 3 d_t $$</div>
+<div class="formula">$$ L_{conv} = \frac{d_c - d_t}{2 \tan(\alpha)} $$</div>
+<div class="formula">$$ L_{div} = \frac{d_e - d_t}{2 \tan(\beta)} $$</div>
+<div class="formula">$$ L_{total} = L_c + L_{conv} + L_{div} $$</div>
+<div class="formula">$$ t_w = \frac{P_c \cdot d_c}{16000} $$</div>
+
+<h2>Flow Analysis</h2>
+
+<div class="formula">
+$$ P_e = P_c \left(1 + \frac{\gamma - 1}{2} M_e^2\right)^{-\frac{\gamma}{\gamma-1}} $$
+</div>
+
+<div class="formula">
+$$ T_e = T_c \left(1 + \frac{\gamma - 1}{2} M_e^2\right)^{-1} $$
+</div>
+
+<div class="formula">
+$$ V_e = M_e \sqrt{\gamma R T_e} $$
+</div>
+
+<div class="formula">
+$$ F = \dot{m} V_e + (P_e - P_a) A_e $$
+</div>
+
+<div class="formula">
+$$ I_{sp} = \frac{V_e}{g} $$
+</div>
+
+<h2>Bell Nozzle (Rao Method)</h2>
+
+<div class="formula">
+$$ L = f \cdot\frac{r_t}{\tan(15^\circ)} \left[ \sqrt{\epsilon - 1} + 1.5\left(\frac{1}{\cos(15^\circ)} - 1\right) \right] $$
+</div>
+
+<div class="formula">
+$$ r(x) = y_n + \tan(\theta_n)(x - x_n) + \frac{\tan(\theta_e) - \tan(\theta_n)}{2(L - x_n)} (x - x_n)^2 $$
+</div>
+
+</div>
+
+</body>
+</html>

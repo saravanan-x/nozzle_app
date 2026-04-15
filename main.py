@@ -10,6 +10,7 @@ import bell_2d as b2
 import conical_2d as c2
 import export_plot as exp
 import result as rs
+import bell_cfd as bc
 
 importlib.reload(noz_geo)
 
@@ -82,6 +83,9 @@ def run_simulation(f, pc, tc, y, r, altitude, sy, SF, divergent_angle, convergen
     result_exl = rs.result(f, m, cd_mm, lc_mm, conv_mm, dt_mm, div_mm, de_mm, total_mm,
         ar, ρ0, vt, ρt, me, mg, mc, ep, et, v_e, isp, m0, F)
 
+    #--------------bell CFD graph--------
+    bellcfd = bc.bell_cfd(r1, cl, cr, con_l, e, rt, re, l1, Re, rn, ln, r_start, r_exit, slope_N, slope_exit, tita_n, tita_e, l, theta, x, xn, rx, yn, θn)
+
 
     return {
         # -------- Geometry --------
@@ -151,6 +155,7 @@ def run_simulation(f, pc, tc, y, r, altitude, sy, SF, divergent_angle, convergen
         "3d_plot": d3_path,
         "2d_plot": d2_path,
         "coni_plot": conical_path,
+        "bell_cfd_plot": bellcfd,
 
         #-------download-----
         "excel_file": cad_plot["excel"],

@@ -772,15 +772,15 @@ body { background: var(--bg); color: var(--text); font-family: var(--ui); font-s
             <div class="section-body">
               <p style="color:var(--text3);font-size:12px;padding:8px 4px 12px;">TFlow analysis uses computed flow properties. Run the simulation first to populate values.</p>
               {% if result %}
-              <div class="res-row"><span class="res-label">Nozzle Area Ratio</span><span class="res-val">{{ "%.2f"|format(result.ar) }}</span><span class="res-unit">K</span></div>
-              <div class="res-row"><span class="res-label">Throat Velocity</span><span class="res-val">{{ "%.2f"|format(result.vt) }}</span><span class="res-unit">K</span></div>
+              <div class="res-row"><span class="res-label">Nozzle Area Ratio</span><span class="res-val">{{ "%.2f"|format(result.ar) }}</span><span class="res-unit">-</span></div>
+              <div class="res-row"><span class="res-label">Throat Velocity</span><span class="res-val">{{ "%.2f"|format(result.vt) }}</span><span class="res-unit">M/s</span></div>
               <div class="res-row"><span class="res-label">Exit Mach vt</span><span class="res-val">{{ "%.2f"|format(result.me) }}</span><span class="res-unit">m/s</span></div>
               <div class="res-row"><span class="res-label">Exit Pressure</span><span class="res-val">{{ "%.2f"|format(result.ep) }}</span><span class="res-unit">Pa</span></div>
-              <div class="res-row"><span class="res-label">Exit Temperature</span><span class="res-val">{{ "%.2f"|format(result.et) }}</span><span class="res-unit">Pa</span></div>
-              <div class="res-row"><span class="res-label">Exit Velocity</span><span class="res-val">{{ "%.2f"|format(result.v_e) }}</span><span class="res-unit">Pa</span></div>
-              <div class="res-row"><span class="res-label">Specific impulse</span><span class="res-val">{{ "%.2f"|format(result.isp) }}</span><span class="res-unit">Pa</span></div>
-              <div class="res-row"><span class="res-label">Mass Flow Rate</span><span class="res-val">{{ "%.2f"|format(result.m0) }}</span><span class="res-unit">Pa</span></div>
-              <div class="res-row"><span class="res-label">Final Thrust</span><span class="res-val">{{ "%.2f"|format(result.F) }}</span><span class="res-unit">Pa</span></div>
+              <div class="res-row"><span class="res-label">Exit Temperature</span><span class="res-val">{{ "%.2f"|format(result.et) }}</span><span class="res-unit">K</span></div>
+              <div class="res-row"><span class="res-label">Exit Velocity</span><span class="res-val">{{ "%.2f"|format(result.v_e) }}</span><span class="res-unit">M/s</span></div>
+              <div class="res-row"><span class="res-label">Specific impulse</span><span class="res-val">{{ "%.2f"|format(result.isp) }}</span><span class="res-unit">S</span></div>
+              <div class="res-row"><span class="res-label">Mass Flow Rate</span><span class="res-val">{{ "%.2f"|format(result.m0) }}</span><span class="res-unit">Kg/s</span></div>
+              <div class="res-row"><span class="res-label">Final Thrust</span><span class="res-val">{{ "%.2f"|format(result.F) }}</span><span class="res-unit">N</span></div>
               <div style="height:12px;"></div>
               <p style="color:var(--text3);font-size:11px;font-family:var(--mono);">Wall material analysis &amp; thermal mapping not yet configured in this build.</p>
               {% endif %}

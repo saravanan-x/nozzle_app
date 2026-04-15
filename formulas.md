@@ -1,54 +1,3 @@
-
-<divalign="center"style="
-
-    padding: 15px;
-
-    border-radius: 12px;
-
-    background: linear-gradient(135deg, #0F2027, #203A43, #2C5364);
-
-    box-shadow: 0px 4px 20px rgba(0,0,0,0.4);">
-
-<h1style="
-
-    color: #4FC3F7;
-
-    font-size: 38px;
-
-    margin: 0;
-
-    font-weight: bold;">
-
-Rocket Nozzle Design
-
-</h1>
-
-<pstyle="
-
-    color: #B0BEC5;
-
-    font-size: 16px;
-
-    margin-top: 5px;">
-
-Flow Calculations • Simulation • Geometry
-
-</p>
-
-</div>
-
-<palign="center">
-
-  [imgsrc=&#34;https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge&amp;logo=python&#34;/](imgsrc=%22https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge&logo=python%22/)
-
-  [imgsrc=&#34;https://img.shields.io/badge/Aerospace-Propulsion-black?style=for-the-badge&#34;/](imgsrc=%22https://img.shields.io/badge/Aerospace-Propulsion-black?style=for-the-badge%22/)
-
-  [imgsrc=&#34;https://img.shields.io/badge/Focus-Nozzle%20Design-orange?style=for-the-badge&#34;/](imgsrc=%22https://img.shields.io/badge/Focus-Nozzle%20Design-orange?style=for-the-badge%22/)
-
-  [imgsrc=&#34;https://img.shields.io/badge/Status-Active-success?style=for-the-badge&#34;/](imgsrc=%22https://img.shields.io/badge/Status-Active-success?style=for-the-badge%22/)
-
-</p>
-
 <divalign="center"style="
 
     padding: 15px;
@@ -155,7 +104,7 @@ Flow Calculations • Simulation • Geometry
 
 | :--- | :--- | :--- |
 
-| **Exit Mach ($M_e$)** |
+| **Exit Mach ($M_e$)** | 
 
 $$
 M_e = \sqrt{\frac{2}{\gamma - 1} \left[\left(\frac{P_c}{P_e}\right)^{\frac{\gamma - 1}{\gamma}} - 1\right]}
@@ -163,7 +112,7 @@ $$
 
  | Mach number at the exit plane. |
 
-| **Area Ratio ($\epsilon$)** |
+| **Area Ratio ($\epsilon$)** | 
 
 $$
 \frac{A_e}{A_t} = \left(\frac{\gamma+1}{2}\right)^{-\frac{\gamma+1}{2(\gamma-1)}} \cdot \frac{\left(1 + \frac{\gamma-1}{2} M_e^2\right)^{\frac{\gamma+1}{2(\gamma-1)}}}{M_e}
@@ -175,23 +124,26 @@ $$
 
 *Calculates the rate of propellant consumption through the nozzle.*
 
-***General Flow:**
+***General Flow:** 
 
 $$
 \dot{m}_g = \frac{A_t P_c}{\sqrt{T_c}} \sqrt{\frac{\gamma}{R}} \cdot\left[M_e \left(1 + \frac{\gamma - 1}{2} M_e^2\right)^{-\frac{\gamma + 1}{2(\gamma - 1)}}\right]
 $$
 
-***Choked Flow:**
+
+***Choked Flow:** 
 
 $$
 \dot{m}_c = \frac{A_t P_c}{\sqrt{T_c}} \sqrt{\frac{\gamma}{R}} \cdot\left(\frac{\gamma + 1}{2}\right)^{-\frac{\gamma + 1}{2(\gamma - 1)}}
 $$
 
-***Continuity Equation:**
+
+***Continuity Equation:** 
 
 $$
 \dot{m} = \rho_t\cdot V_t \cdot A_t
 $$
+
 
 ### 3. Thermodynamic Properties
 
@@ -201,7 +153,7 @@ $$
 
 | :--- | :--- | :--- |
 
-| **Chamber** | **Stagnation Density** |
+| **Chamber** | **Stagnation Density** | 
 
 $$
 \rho_0 = \frac{P_c}{R T_c}
@@ -209,7 +161,7 @@ $$
 
  |
 
-| **Throat** | **Velocity ($V_t$)** |
+| **Throat** | **Velocity ($V_t$)** | 
 
 $$
 V_t = \sqrt{\frac{2 \gamma R T_c}{\gamma + 1}}
@@ -217,7 +169,7 @@ $$
 
  |
 
-| **Throat** | **Density ($\rho_t$)** |
+| **Throat** | **Density ($\rho_t$)** | 
 
 $$
 \rho_t = \rho_0 \left(\frac{2}{\gamma+1}\right)^{\frac{1}{\gamma-1}}
@@ -231,21 +183,27 @@ $$
 
 ***Exit Pressure ($P_e$):**
 
+
 $$
 P_e = P_c \left(1 + \frac{\gamma - 1}{2} M_e^2\right)^{-\frac{\gamma}{\gamma-1}}
 $$
 
+
 ***Exit Temperature ($T_e$):**
+
 
 $$
 T_e = T_c \left(1 + \frac{\gamma - 1}{2} M_e^2\right)^{-1}
 $$
 
+
 ***Exit Velocity ($V_e$):**
+
 
 $$
 V_e = M_e \sqrt{\gamma R T_e}
 $$
+
 
 ### 5. Performance Metrics
 

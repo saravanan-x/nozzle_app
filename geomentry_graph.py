@@ -54,10 +54,10 @@ def geomentry_graphs(cd_mm, dt_mm, de_mm, lc_mm, conv_mm, div_mm):
     save_path = "static"
     os.makedirs(save_path, exist_ok=True)
 
-    file_path = os.path.join(save_path, "geomentry.png")
+    file_path = os.path.join(save_path, "out/geomentry.png")
     plt.savefig(file_path, dpi=300, bbox_inches='tight')
     
     plt.close()
     
 
-    return "/static/geomentry.png"
+    return "/static/out/geomentry.png"

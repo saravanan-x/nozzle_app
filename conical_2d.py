@@ -164,10 +164,10 @@ def conical_2d(dt_mm, de_mm, ae, at, lc_mm, cd_mm, conv_mm, tha):
     save_path = "static"
     os.makedirs(save_path, exist_ok=True)
 
-    file_path = os.path.join(save_path, "conical_nozzle.png")
+    file_path = os.path.join(save_path, "out/conical_nozzle.png")
     plt.savefig(file_path, dpi=300, bbox_inches='tight')
 
     plt.close()
     
 
-    return "/static/conical_nozzle.png"
+    return "/static/out/conical_nozzle.png"

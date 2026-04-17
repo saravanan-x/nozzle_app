@@ -4,274 +4,12 @@
 <meta charset="UTF-8">
 <title>Nozzle design | Simulate</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
 <script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
-<style>
-:root {
---bg: #1a1c21;
---sidebar: #1e2027;
---panel: #23252d;
---panel2: #292b34;
---border: #35383f;
---border2: #44475a;
---accent: #5b9cf6;
---accent2: #3a7bd5;
---green: #4ec94e;
---green2: #2ea82e;
---yellow: #e8c842;
---red: #e05252;
---text: #c9ccd4;
---text2: #8a8d96;
---text3: #5a5d66;
---mono: 'Share Tech Mono', monospace;
---ui: 'Rajdhani', sans-serif;
---tab-h: 36px;
---sidebar-w: 168px;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: var(--ui); font-size: 13px; height: 100vh; overflow: hidden; }
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
 
-/* LAYOUT */
-.app { display: flex; height: 100vh; }
-
-/* TOOLBAR */
-.toolbar { position: fixed; top: 0; left: 0; right: 0; height: 34px; background: #14151a; border-bottom: 1px solid #0a0b0d; display: flex; align-items: center; z-index: 100; padding: 0 8px; user-select: none; }
-.toolbar-title { flex: 1; text-align: center; font-family: var(--mono); font-size: 12px; color: var(--text2); letter-spacing: 1px; }
-.menu-bar { display: flex; gap: 2px; }
-.menu-bar span { padding: 4px 10px; font-size: 12px; color: var(--text); cursor: pointer; border-radius: 2px; }
-.menu-bar span:hover { background: var(--panel2); }
-.tb-icons { display: flex; gap: 6px; align-items: center; margin-left: 12px; }
-.tb-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 2px; cursor: pointer; background: var(--panel); color: var(--text2); font-size: 11px; }
-.tb-icon:hover { background: var(--panel2); color: var(--text); }
-.tb-icon.run { background: var(--panel); border-color: var(--green); color: var(--green); font-size:13px; }
-.tb-icon.run:hover { background: var(--green2); border-color: var(--green2); color: #fff; }
-.tb-sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
-
-/* SIDEBAR */
-.sidebar { width: var(--sidebar-w); background: var(--sidebar); border-right: 1px solid var(--border); padding-top: 34px; display: flex; flex-direction: column; flex-shrink: 0; }
-.sidebar-item { padding: 10px 14px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text2); border-left: 3px solid transparent; transition: all .15s; letter-spacing: .3px; }
-.sidebar-item:hover { color: var(--text); background: var(--panel); }
-.sidebar-item.active { color: #fff; background: var(--accent2); border-left-color: var(--accent); }
-.sidebar-divider { height: 1px; background: var(--border); margin: 6px 0; }
-
-/* MAIN */
-.main { flex: 1; display: flex; flex-direction: column; padding-top: 34px; overflow: hidden; min-width: 0; }
-
-/* TAB BAR */
-.tab-bar { display: flex; background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.tab { padding: 0 18px; height: var(--tab-h); display: flex; align-items: center; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text2); border-right: 1px solid var(--border); border-bottom: 2px solid transparent; transition: all .15s; letter-spacing: .3px; white-space: nowrap; }
-.tab:hover { color: var(--text); background: var(--panel2); }
-.tab.active { color: #fff; background: var(--bg); border-bottom-color: var(--accent); }
-
-/* CONTENT */
-.content { flex: 1; overflow: hidden; display: flex; }
-.tab-panel { display: none; width: 100%; height: 100%; overflow: hidden; }
-.tab-panel.active { display: flex; }
-
-/* FORM COLS */
-.form-cols { display: flex; width: 100%; height: 100%; overflow: hidden; }
-.form-col { flex: 1; overflow-y: auto; padding: 14px; border-right: 1px solid var(--border); }
-.form-col:last-child { border-right: none; }
-.form-col::-webkit-scrollbar { width: 4px; }
-.form-col::-webkit-scrollbar-track { background: var(--bg); }
-.form-col::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-/* SECTIONS + FIELDS + RESULTS (unchanged) */
-.section { margin-bottom: 16px; }
-.section-head { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--panel); border: 1px solid var(--border); border-bottom: none; font-size: 12px; font-weight: 600; color: var(--accent); letter-spacing: .8px; text-transform: uppercase; }
-.section-head .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink:0; }
-.section-body { border: 1px solid var(--border); background: var(--panel2); padding: 10px; }
-.field { display: grid; grid-template-columns: 1fr 110px 46px; align-items: center; gap: 6px; margin-bottom: 7px; min-height: 26px; }
-.field:last-child { margin-bottom: 0; }
-.field label { font-size: 12.5px; color: var(--text2); font-family: var(--ui); font-weight: 400; }
-.field input { width: 100%; height: 24px; padding: 0 8px; background: #1a1c21; border: 1px solid var(--border2); color: #d5d8e0; font-family: var(--mono); font-size: 12px; border-radius: 1px; outline: none; transition: border-color .15s; }
-.field input:focus { border-color: var(--accent); background: #1d2028; }
-.field .unit { font-family: var(--mono); font-size: 11px; color: var(--text3); }
-.field-radio { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; padding: 3px 6px; border-radius: 1px; }
-.field-radio:hover { background: rgba(255,255,255,.03); }
-.field-radio input[type=radio], .field-radio input[type=checkbox] { width: auto; height: auto; accent-color: var(--accent); cursor: pointer; margin: 0; }
-.field-radio label { font-size: 12.5px; color: var(--text2); cursor: pointer; }
-.res-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,.04); gap: 8px; }
-.res-row:last-child { border-bottom: none; }
-.res-label { font-size: 12px; color: var(--text2); flex: 1; }
-.res-val { font-family: var(--mono); font-size: 12px; color: #e0e4ef; text-align: right; }
-.res-unit { font-family: var(--mono); font-size: 10px; color: var(--text3); min-width: 36px; text-align: right; }
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text3); gap: 10px; font-size: 13px; }
-.empty-state svg { opacity: .2; }
-.sub-group { margin-left: 14px; padding-left: 10px; border-left: 2px solid var(--border); margin-bottom: 6px; }
-
-/* NEW: Graphs & Export Section */
-.graphs-row {
-  display: flex;
-  gap: 16px;
-  padding: 20px 14px;
-  flex-wrap: wrap;
-  background: var(--bg);
-}
-.graph-cell {
-  flex: 1;
-  min-width: 280px;
-  background: var(--panel2);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.graph-title {
-  padding: 8px 12px;
-  background: var(--panel);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-}
-.graph-placeholder {
-  padding: 10px;
-  text-align: center;
-  min-height: 220px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #0a0b10;
-}
-.graph-placeholder img {
-  max-width: 100%;
-  max-height: 210px;
-  border: 1px solid var(--border2);
-}
-.export-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px;
-  background: var(--sidebar);
-  border-top: 1px solid var(--border);
-}
-.export-label {
-  font-size: 13px;
-  color: var(--text2);
-  font-weight: 500;
-}
-.export-btn {
-  padding: 8px 16px;
-  background: var(--panel);
-  color: var(--text);
-  text-decoration: none;
-  border-radius: 2px;
-  font-size: 13px;
-  border: 1px solid var(--border2);
-  transition: all 0.15s;
-}
-.export-btn:hover {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-}
-
-/* Run button & Status */
-
-.run-btn { flex: 1; height: 34px; background: linear-gradient(135deg, #2e7d32, #388e3c); border: 1px solid #2e7d32; color: #fff; font-family: var(--ui); font-size: 14px; font-weight: 700; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; border-radius: 1px; transition: all .15s; }
-.run-btn:hover { background: linear-gradient(135deg, #388e3c, #43a047); }
-.run-btn:active { transform: translateY(1px); }
-.reset-btn { height: 34px; padding: 0 18px; background: transparent; border: 1px solid var(--border2); color: var(--text2); font-family: var(--ui); font-size: 13px; font-weight: 500; letter-spacing: .5px; cursor: pointer; border-radius: 1px; transition: all .15s; }
-.reset-btn:hover { border-color: var(--text2); color: var(--text); }
-.statusbar { height: 22px; background: #12131a; border-top: 1px solid var(--border); display: flex; align-items: center; padding: 0 12px; gap: 18px; font-family: var(--mono); font-size: 10px; color: var(--text3); flex-shrink: 0; }
-.status-item { display: flex; align-items: center; gap: 5px; }
-.status-dot { width: 5px; height: 5px; border-radius: 50%; }
-.status-dot.green { background: var(--green); box-shadow: 0 0 4px var(--green); }
-.status-dot.gray { background: var(--text3); }
-.status-sep { width: 1px; height: 12px; background: var(--border); }
-.viewer {
-  display: none;
-  position: fixed;
-  z-index: 9999;
-  inset: 0;
-  background: #0b0d12;
-}
-
-.viewer-toolbar {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  z-index: 10;
-}
-
-.viewer-toolbar button {
-  background: #1f2430;
-  color: #fff;
-  border: 1px solid #444;
-  padding: 6px 12px;
-  margin-left: 5px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.viewer-toolbar button:hover {
-  background: #2f3545;
-}
-
-.viewer-canvas {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.viewer-canvas img {
-  max-width: none;
-  max-height: none;
-  cursor: grab;
-}
-
-.clickable-img {
-  cursor: zoom-in;
-  transition: 0.2s;
-}
-
-.clickable-img:hover {
-  transform: scale(1.03);
-}
-.viewer-canvas img {
-  transform-origin: 0 0; /* IMPORTANT */
-  transition: transform 0.05s linear;
-}
-.thermal-img-grid {
-  display: flex;
-  flex-direction: column !important;   /* 🔥 FORCE COLUMN */
-  gap: 12px;
-  width: 100%;
-}
-
-.thermal-img-box {
-  width: 100%;
-  background: #0f1117;
-  border: 1px solid #2a2d36;
-  border-radius: 6px;
-  padding: 8px;
-}
-
-.thermal-img-box img {
-  width: 100%;
-  height: 200px;
-  object-fit: contain;
-  display: block;
-  cursor: zoom-in;
-}
-
-.img-title {
-  font-size: 10px;
-  color: var(--text3);
-  font-family: var(--mono);
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-}
-.form-col .thermal-img-grid {
-  flex-direction: column !important;
-}
-
-</style>
 </head>
 <body>
 
@@ -299,6 +37,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--ui); font-s
   <div class="sidebar-divider"></div>
   <div class="sidebar-item" onclick="activeSidebar(this, 4)">Graph</div>
   <div class="sidebar-item" onclick="activeSidebar(this, 3)">Flow Analysis</div>
+  <div class="sidebar-item" onclick="openFormulasModal()">Formulas</div>
 </div>
 
 <!-- MAIN -->
@@ -957,133 +696,452 @@ body { background: var(--bg); color: var(--text); font-family: var(--ui); font-s
   </div>
 </div>
 
-<script>
-const tabs = document.querySelectorAll('.tab');
-const panels = document.querySelectorAll('.tab-panel');
-const sideItems = document.querySelectorAll('.sidebar-item');
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
-function setTab(i) {
-  tabs.forEach((t, idx) => t.classList.toggle('active', idx === i));
-  panels.forEach((p, idx) => p.classList.toggle('active', idx === i));
-  sessionStorage.setItem('nozzle_tab', i);
-}
+<!-- FORMULAS MODAL - Copy and paste this ENTIRE block exactly before your closing </body> tag -->
+<div id="formulasModal">
+    <div class="modal-content">
+        
+        <!-- Modal Header -->
+        <div class="modal-header">
+            <h1>Rocket Nozzle Design</h1>
+            <span class="close-btn" onclick="closeFormulasModal()">×</span>
+            <p style="color:#B0BEC5; margin-top:5px;">Flow Calculations • Simulation • Geometry</p>
+        </div>
+        
+        <!-- Modal Body - ALL FORMULAS -->
+        <div class="modal-body">
+            
+            <h2>Rocket Nozzle Design Calculations</h2>
+            
+            <!-- Given Parameters -->
+            <h3>Given Parameters</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Variable</th>
+                        <th>Parameter</th>
+                        <th>Variable</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Thrust (N)</strong></td>
+                        <td>\( F \)</td>
+                        <td><strong>Chamber Temp (K)</strong></td>
+                        <td>\( T_c \)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Chamber Pressure (Pa)</strong></td>
+                        <td>\( P_c \)</td>
+                        <td><strong>Specific Heat Ratio</strong></td>
+                        <td>\( \gamma \)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Exit Pressure (Pa)</strong></td>
+                        <td>\( P_e \)</td>
+                        <td><strong>Gas Constant (J/kg·K)</strong></td>
+                        <td>\( R \)</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- Flow & Area Dynamics -->
+            <h3>Flow &amp; Area Dynamics</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Formula</th>
+                        <th>Metric</th>
+                        <th>Formula</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Exit Velocity</strong></td>
+                        <td>\[
+                            V_e = \sqrt{\frac{2\gamma}{\gamma - 1} \cdot R T_c \cdot \left(1 - \left(\frac{P_e}{P_c}\right)^{\frac{\gamma - 1}{\gamma}}\right)}
+                        \]</td>
+                        <td><strong>Exit Mach No.</strong></td>
+                        <td>\[
+                            M_e = \sqrt{\frac{2}{\gamma - 1} \left[ \left(\frac{P_c}{P_e}\right)^{\frac{\gamma - 1}{\gamma}} - 1 \right]}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mass Flow Rate</strong></td>
+                        <td>\[
+                            \dot{m} = \frac{F}{V_e}
+                        \]</td>
+                        <td><strong>Area Ratio</strong></td>
+                        <td>\[
+                            \frac{A_e}{A_t} = \frac{1}{M_e} \left[ \frac{1 + \frac{\gamma - 1}{2} M_e^2}{\frac{\gamma + 1}{2}} \right]^{\frac{\gamma + 1}{2(\gamma - 1)}}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Throat Area</strong></td>
+                        <td>\[
+                            A_t = \frac{\dot{m}}{P_c} \cdot \sqrt{\frac{R T_c}{\gamma} \cdot \left(\frac{\gamma + 1}{2}\right)^{\frac{\gamma + 1}{2(\gamma - 1)}}}
+                        \]</td>
+                        <td><strong>Exit Area</strong></td>
+                        <td>\[
+                            A_e = A_t \cdot \frac{A_e}{A_t}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Throat Diameter</strong></td>
+                        <td>\[
+                            d_t = \sqrt{\frac{4A_t}{\pi}}
+                        \]</td>
+                        <td><strong>Exit Diameter</strong></td>
+                        <td>\[
+                            d_e = \sqrt{\frac{4A_e}{\pi}}
+                        \]</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- Geometry & Structural Design -->
+            <h3>Geometry &amp; Structural Design</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Formula</th>
+                        <th>Metric</th>
+                        <th>Formula</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Chamber Diameter</strong></td>
+                        <td>\[
+                            d_c = 3 d_t
+                        \]</td>
+                        <td><strong>Convergent Length</strong></td>
+                        <td>\[
+                            L_{conv} = \frac{d_c - d_t}{2 \tan(\alpha)}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Chamber Area</strong></td>
+                        <td>\[
+                            A_c = \frac{\pi d_c^2}{4}
+                        \]</td>
+                        <td><strong>Divergent Length</strong></td>
+                        <td>\[
+                            L_{div} = \frac{d_e - d_t}{2 \tan(\beta)}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Chamber Length</strong></td>
+                        <td>\[
+                            L_c = \frac{L^* \cdot A_t}{A_c}
+                        \]</td>
+                        <td><strong>Total Length</strong></td>
+                        <td>\[
+                            L_{total} = L_c + L_{conv} + L_{div}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Wall Thickness</strong></td>
+                        <td>\[
+                            t_w = \frac{P_c \cdot d_c}{16000}
+                        \]</td>
+                        <td><strong>Stress Check</strong></td>
+                        <td>\[
+                            \sigma = \frac{P_c \cdot d_c}{2 t_w}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Design Thickness</strong></td>
+                        <td>\[
+                            t = \frac{P_c \cdot d_c \cdot SF}{2 \sigma_{yield}}
+                        \]</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="note" style="background:#1a2530; border-left:5px solid #4FC3F7; padding:15px 20px; margin:25px 0; border-radius:8px; font-size:15px; color:#b0d0e8;">
+                <strong>Note:</strong> All formulas assume isentropic, one-dimensional, ideal-gas flow. Ambient pressure \( P_a \) is used in thrust calculation when nozzle is not perfectly expanded.
+            </div>
+            
+            <!-- Nozzle Flow & Performance Analysis -->
+            <h2>Nozzle Flow &amp; Performance Analysis</h2>
+            <p style="color:#b0d0e8; margin-bottom:25px;">Analytical Framework for Isentropic Expansion</p>
+            
+            <!-- 1. Mach & Area Relations -->
+            <h3>1. Mach &amp; Area Relations</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Formula</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Exit Mach (\( M_e \))</strong></td>
+                        <td>\[
+                            M_e = \sqrt{\frac{2}{\gamma - 1} \left[\left(\frac{P_c}{P_e}\right)^{\frac{\gamma - 1}{\gamma}} - 1\right]}
+                        \]</td>
+                        <td>Mach number at the exit plane.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Area Ratio (\( \epsilon \))</strong></td>
+                        <td>\[
+                            \frac{A_e}{A_t} = \left(\frac{\gamma+1}{2}\right)^{-\frac{\gamma+1}{2(\gamma-1)}} \cdot \frac{\left(1 + \frac{\gamma-1}{2} M_e^2\right)^{\frac{\gamma+1}{2(\gamma-1)}}}{M_e}
+                        \]</td>
+                        <td>Ratio of exit area to throat area.</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 2. Mass Flow Rates -->
+            <h3>2. Mass Flow Rates (\( \dot{m} \))</h3>
+            <div class="formula-block" style="background:#0f1820; padding:18px 22px; border-radius:10px; margin:18px 0; border:1px solid #223344;">
+                <p><strong>General Flow:</strong></p>
+                <div>\[
+                    \dot{m}_g = \frac{A_t P_c}{\sqrt{T_c}} \sqrt{\frac{\gamma}{R}} \cdot \left[M_e \left(1 + \frac{\gamma - 1}{2} M_e^2\right)^{-\frac{\gamma + 1}{2(\gamma - 1)}}\right]
+                \]</div>
+            </div>
+            <div class="formula-block" style="background:#0f1820; padding:18px 22px; border-radius:10px; margin:18px 0; border:1px solid #223344;">
+                <p><strong>Choked Flow:</strong></p>
+                <div>\[
+                    \dot{m}_c = \frac{A_t P_c}{\sqrt{T_c}} \sqrt{\frac{\gamma}{R}} \cdot \left(\frac{\gamma + 1}{2}\right)^{-\frac{\gamma + 1}{2(\gamma - 1)}}
+                \]</div>
+            </div>
+            <div class="formula-block" style="background:#0f1820; padding:18px 22px; border-radius:10px; margin:18px 0; border:1px solid #223344;">
+                <p><strong>Continuity Equation:</strong></p>
+                <div>\[
+                    \dot{m} = \rho_t \cdot V_t \cdot A_t
+                \]</div>
+            </div>
+            
+            <!-- 3. Thermodynamic Properties -->
+            <h3>3. Thermodynamic Properties</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Location</th>
+                        <th>Quantity</th>
+                        <th>Formula</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Chamber</td>
+                        <td><strong>Stagnation Density</strong></td>
+                        <td>\[
+                            \rho_0 = \frac{P_c}{R T_c}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td>Throat</td>
+                        <td><strong>Velocity (\( V_t \))</strong></td>
+                        <td>\[
+                            V_t = \sqrt{\frac{2 \gamma R T_c}{\gamma + 1}}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td>Throat</td>
+                        <td><strong>Density (\( \rho_t \))</strong></td>
+                        <td>\[
+                            \rho_t = \rho_0 \left(\frac{2}{\gamma+1}\right)^{\frac{1}{\gamma-1}}
+                        \]</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 4. Exit Plane Properties -->
+            <h3>4. Exit Plane Properties</h3>
+            <div class="formula-block" style="background:#0f1820; padding:18px 22px; border-radius:10px; margin:18px 0; border:1px solid #223344;">
+                <p><strong>Exit Pressure (\( P_e \)):</strong></p>
+                <div>\[
+                    P_e = P_c \left(1 + \frac{\gamma - 1}{2} M_e^2\right)^{-\frac{\gamma}{\gamma-1}}
+                \]</div>
+            </div>
+            <div class="formula-block" style="background:#0f1820; padding:18px 22px; border-radius:10px; margin:18px 0; border:1px solid #223344;">
+                <p><strong>Exit Temperature (\( T_e \)):</strong></p>
+                <div>\[
+                    T_e = T_c \left(1 + \frac{\gamma - 1}{2} M_e^2\right)^{-1}
+                \]</div>
+            </div>
+            <div class="formula-block" style="background:#0f1820; padding:18px 22px; border-radius:10px; margin:18px 0; border:1px solid #223344;">
+                <p><strong>Exit Velocity (\( V_e \)):</strong></p>
+                <div>\[
+                    V_e = M_e \sqrt{\gamma R T_e}
+                \]</div>
+            </div>
+            
+            <!-- 5. Performance Metrics -->
+            <h3>5. Performance Metrics</h3>
+            <div class="formula-block" style="background:#0f1820; padding:18px 22px; border-radius:10px; margin:18px 0; border:1px solid #223344;">
+                <p><strong>Total Thrust (\( F \)):</strong></p>
+                <div>\[
+                    F = \dot{m} V_e + (P_e - P_a) A_e
+                \]</div>
+                <p style="font-size:14px; margin-top:8px; color:#aaa;">Where \( P_a \) is the ambient atmospheric pressure.</p>
+            </div>
+            <div class="formula-block" style="background:#0f1820; padding:18px 22px; border-radius:10px; margin:18px 0; border:1px solid #223344;">
+                <p><strong>Specific Impulse (\( I_{sp} \)):</strong></p>
+                <div>\[
+                    I_{sp} = \frac{V_e}{g}
+                \]</div>
+            </div>
+            
+            <!-- Bell Nozzle Geometry (Rao Method) -->
+            <h2>Bell Nozzle Geometry (Rao Method)</h2>
+            
+            <!-- 1. Geometric Constants & Point N -->
+            <h3>1. Geometric Constants &amp; Point N</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Quantity</th>
+                        <th>Formula</th>
+                        <th>Quantity</th>
+                        <th>Formula</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Throat Radius</strong></td>
+                        <td>\[
+                            r_t = \frac{d_t}{2}
+                        \]</td>
+                        <td><strong>Expansion Ratio</strong></td>
+                        <td>\[
+                            \epsilon = \frac{A_e}{A_t}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Exit Radius</strong></td>
+                        <td>\[
+                            r_e = \frac{d_e}{2}
+                        \]</td>
+                        <td><strong>Throat Arc \( R_1 \)</strong></td>
+                        <td>\( R_1 = 0.382 \, r_t \)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>X-Coord at N</strong></td>
+                        <td>\[
+                            x_n = R_1 \sin \theta_n
+                        \]</td>
+                        <td><strong>Y-Coord at N</strong></td>
+                        <td>\[
+                            y_n = r_t + R_1 (1 - \cos \theta_n)
+                        \]</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 2. Convergent & Bell Angles -->
+            <h3>2. Convergent &amp; Bell Angles</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Quantity</th>
+                        <th>Formula / Value</th>
+                        <th>Quantity</th>
+                        <th>Formula / Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Conv. Angle \( \theta \)</strong></td>
+                        <td>\( 25^\circ \)</td>
+                        <td><strong>Arc Radius \( R_c \)</strong></td>
+                        <td>\( R_c = 1.5 \, r_t \)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Start Angle \( \theta_n \)</strong></td>
+                        <td>\( 30^\circ \)</td>
+                        <td><strong>Arc End Rad \( r_n \)</strong></td>
+                        <td>\[
+                            r_n = r_t + R_c (1 - \cos \theta)
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Exit Angle \( \theta_e \)</strong></td>
+                        <td>\( 8.5^\circ \)</td>
+                        <td><strong>Arc Length \( l_1 \)</strong></td>
+                        <td>\[
+                            l_1 = R_c \sin \theta
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Conical Length \( l_n \)</strong></td>
+                        <td>\[
+                            l_n = \frac{r_t(\sqrt{\epsilon}-1) + R_c(\cos\theta - 1)}{\tan\theta}
+                        \]</td>
+                        <td><strong>Fractional Len \( f \)</strong></td>
+                        <td>User Defined (e.g. 0.8)</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 3. Core Design Equations -->
+            <h3>3. Core Design Equations</h3>
+            <div class="formula-block" style="background:#0f1820; padding:18px 22px; border-radius:10px; margin:18px 0; border:1px solid #223344;">
+                <p><strong>Nozzle Length (Rao Approximation):</strong></p>
+                <div>\[
+                    L = f \cdot \frac{r_t}{\tan(15^\circ)} \left[ \sqrt{\epsilon - 1} + 1.5 \left(\frac{1}{\cos(15^\circ)} - 1\right) \right]
+                \]</div>
+            </div>
+            <div class="formula-block" style="background:#0f1820; padding:18px 22px; border-radius:10px; margin:18px 0; border:1px solid #223344;">
+                <p><strong>Parabolic Bell Contour Equation:</strong></p>
+                <div>\[
+                    r(x) = y_n + \tan(\theta_n)(x - x_n) + \frac{\tan(\theta_e) - \tan(\theta_n)}{2(L - x_n)} (x - x_n)^2
+                \]</div>
+            </div>
+            
+            <!-- 4. Boundary Conditions -->
+            <h3>4. Boundary Conditions</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Condition</th>
+                        <th>Formula</th>
+                        <th>Condition</th>
+                        <th>Formula</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Radius at N</strong></td>
+                        <td>\[
+                            r(x_n) = y_n
+                        \]</td>
+                        <td><strong>Slope at N</strong></td>
+                        <td>\[
+                            \left.\frac{dr}{dx}\right|_{x_n} = \tan(\theta_n)
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Radius at Exit</strong></td>
+                        <td>\[
+                            r(L) = r_e
+                        \]</td>
+                        <td><strong>Slope at Exit</strong></td>
+                        <td>\[
+                            \left.\frac{dr}{dx}\right|_{L} = \tan(\theta_e)
+                        \]</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div style="text-align:center; margin-top:60px; color:#4a6b7f; font-size:14px;">
+                Rocket Nozzle Design Calculations • Purely analytical reference sheet
+            </div>
+            
+        </div>
+    </div>
+</div>
 
-function activeSidebar(el, tabIndex) {
-  sideItems.forEach(s => s.classList.remove('active'));
-  el.classList.add('active');
-  setTab(tabIndex);
-}
-
-// Restore tab on reload
-window.addEventListener('load', () => {
-  const saved = sessionStorage.getItem('nozzle_tab');
-  if (saved !== null) setTab(parseInt(saved));
-});
-
-// Save active tab before submit
-document.getElementById('mainForm').addEventListener('submit', () => {
-  const active = [...tabs].findIndex(t => t.classList.contains('active'));
-  sessionStorage.setItem('nozzle_tab', active);
-});
-
-//img viewer
-let scale = 1;
-let startX = 0, startY = 0;
-let translateX = 0, translateY = 0;
-let isDragging = false;
-
-const viewer = document.getElementById("imgViewer");
-const img = document.getElementById("viewerImg");
-
-// OPEN VIEWER
-document.querySelectorAll(".clickable-img").forEach(el => {
-  el.addEventListener("click", () => {
-    viewer.style.display = "block";
-    img.src = el.src;
-
-    // reset state
-    scale = 1;
-    translateX = 0;
-    translateY = 0;
-    updateTransform();
-  });
-});
-
-// APPLY TRANSFORM
-function updateTransform() {
-  img.style.transform =
-    `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-}
-
-// ZOOM FUNCTIONS
-function zoomIn() {
-  scale *= 1.2;
-  updateTransform();
-}
-
-function zoomOut() {
-  scale /= 1.2;
-  updateTransform();
-}
-
-function resetZoom() {
-  scale = 1;
-  translateX = 0;
-  translateY = 0;
-  updateTransform();
-}
-
-// MOUSE WHEEL ZOOM (ZOOM AT CURSOR)
-img.addEventListener("wheel", (e) => {
-  e.preventDefault();
-
-  const rect = img.getBoundingClientRect();
-  const offsetX = e.clientX - rect.left;
-  const offsetY = e.clientY - rect.top;
-
-  const zoom = e.deltaY < 0 ? 1.1 : 0.9;
-
-  translateX -= offsetX * (zoom - 1);
-  translateY -= offsetY * (zoom - 1);
-
-  scale *= zoom;
-  updateTransform();
-});
-
-// DRAG (PAN)
-img.addEventListener("mousedown", (e) => {
-  isDragging = true;
-  startX = e.clientX - translateX;
-  startY = e.clientY - translateY;
-  img.style.cursor = "grabbing";
-});
-
-window.addEventListener("mousemove", (e) => {
-  if (!isDragging) return;
-
-  translateX = e.clientX - startX;
-  translateY = e.clientY - startY;
-  updateTransform();
-});
-
-window.addEventListener("mouseup", () => {
-  isDragging = false;
-  img.style.cursor = "grab";
-});
-
-// CLOSE VIEWER
-function closeViewer() {
-  viewer.style.display = "none";
-}
-
-// DOUBLE CLICK RESET
-img.addEventListener("dblclick", resetZoom);
-
-// CLICK OUTSIDE CLOSE
-viewer.addEventListener("click", (e) => {
-  if (e.target === viewer) closeViewer();
-});
-
-</script>
 </body>
 </html>

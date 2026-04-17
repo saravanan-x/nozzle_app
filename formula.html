@@ -2,410 +2,632 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Rocket Nozzle Design | Analytical Framework & Formulae</title>
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rocket Nozzle Design Calculations</title>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet"> -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg: #0a0a0a;
+        }
+        
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            box-sizing: border-box;https://www.youtube.com/watch?v=HNwfwdSu58E&t=1026s
         }
-
+        
         body {
-            background: #0b0e17;
-            font-family: 'Inter', sans-serif;
-            color: #eef2ff;
-            padding: 2rem 1.5rem;
+            background-color: var(--bg);
+            color: #e0f0ff;
+            font-family: 'Inter', system-ui, sans-serif;
+            line-height: 1.6;
+            padding: 20px 10px;
+            min-height: 100vh;
         }
-
-        .document-container {
-            max-width: 1300px;
+        
+        .container {
+            max-width: 1100px;
             margin: 0 auto;
-        }
-
-        /* header */
-        .doc-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid rgba(59, 130, 246, 0.4);
-            padding-bottom: 1.2rem;
-        }
-        .title-area h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #FFFFFF, #7aa9ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            letter-spacing: -0.3px;
-        }
-        .title-area p {
-            color: #8f9bb5;
-            margin-top: 0.3rem;
-            font-size: 0.85rem;
-        }
-        .version-badge {
-            background: #111827;
-            padding: 0.3rem 1rem;
-            border-radius: 30px;
-            font-size: 0.75rem;
-            font-family: monospace;
-            border: 1px solid #2d3748;
-        }
-
-        /* card style */
-        .card {
-            background: #0f121f;
-            border-radius: 28px;
-            border: 1px solid #232838;
-            margin-bottom: 2rem;
+            background: rgba(15, 20, 30, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
             overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
         }
-        .card-header {
-            padding: 1rem 1.8rem;
-            background: rgba(10, 14, 23, 0.8);
-            border-bottom: 1px solid #1e253c;
+        
+        .header {
+            padding: 15px;
+            background: linear-gradient(135deg, #0F2027, #203A43, #2C5364);
+            box-shadow: 0px 4px 20px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #4FC3F7;
+            font-size: 38px;
+            margin: 0;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -1px;
+        }
+        
+        .header p {
+            color: #B0BEC5;
+            font-size: 16px;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+        
+        .badges {
+            text-align: center;
+            padding: 15px 20px;
+            background: #111;
             display: flex;
-            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 12px;
         }
-        .card-header i {
-            font-size: 1.5rem;
-            color: #3b82f6;
+        
+        .content {
+            padding: 40px 35px;
         }
-        .card-header h2 {
-            font-size: 1.3rem;
-            font-weight: 600;
+        
+        h2 {
+            color: #4FC3F7;
+            font-size: 28px;
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #1e3a4a;
+            font-family: 'Space Grotesk', sans-serif;
         }
-        .card-body {
-            padding: 1.8rem;
+        
+        h3 {
+            color: #90e0c0;
+            font-size: 22px;
+            margin: 35px 0 18px 0;
         }
-
-        /* markdown-styled tables */
-        .formula-table {
+        
+        table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
-            margin: 1.2rem 0;
+            margin-bottom: 30px;
+            background: #111;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
-        .formula-table th, .formula-table td {
-            padding: 0.9rem 0.8rem;
-            border-bottom: 1px solid #1f253c;
+        
+        th, td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid #222;
             vertical-align: top;
         }
-        .formula-table th {
-            text-align: left;
+        
+        th {
+            background: #1a2530;
+            color: #7dd3fc;
             font-weight: 600;
-            color: #b9c8ff;
-            width: 30%;
-            background: #0a0e18;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .formula-table td {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
-            color: #cfdef5;
+        
+        tr:last-child td {
+            border-bottom: none;
         }
-        .math-inline {
-            font-family: 'JetBrains Mono', monospace;
-            background: #070b12;
-            padding: 0.2rem 0.4rem;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            display: inline-block;
+        
+        td strong {
+            color: #b0f0ff;
         }
-        .section-divider {
-            height: 2px;
-            background: linear-gradient(90deg, #1e2a5e, transparent);
-            margin: 1.2rem 0;
+        
+        .math {
+            font-size: 1.05em;
         }
-        .subsection-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin: 1.5rem 0 1rem 0;
-            color: #bbd7ff;
-            border-left: 3px solid #3b82f6;
-            padding-left: 12px;
-        }
-        .parameter-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1rem;
-            background: #0a0e18;
-            border-radius: 20px;
-            padding: 1.2rem;
-            margin: 1rem 0;
-        }
-        .param-item {
+        
+        .section-title {
+            color: #90e0c0;
+            font-size: 20px;
+            margin: 45px 0 15px 0;
             display: flex;
-            justify-content: space-between;
-            border-bottom: 1px dashed #252c44;
-            padding: 0.5rem 0;
+            align-items: center;
+            gap: 10px;
         }
-        .param-name {
-            font-weight: 500;
-            color: #9aa9c7;
+        
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #4FC3F7;
+            border-radius: 50%;
         }
-        .param-symbol {
-            font-family: monospace;
-            font-weight: 700;
-            color: #90cdf4;
-        }
-        .footnote {
-            font-size: 0.7rem;
-            color: #6e7ea8;
-            margin-top: 1rem;
-            text-align: right;
-            border-top: 1px solid #1f253c;
-            padding-top: 1rem;
-        }
-        @media (max-width: 700px) {
-            .card-body {
-                padding: 1.2rem;
-            }
-            .formula-table th, .formula-table td {
-                display: block;
-                width: 100%;
-            }
-            .formula-table tr {
-                margin-bottom: 1rem;
-                display: block;
-            }
-        }
-        kbd {
-            background: #111827;
-            border-radius: 6px;
-            padding: 0.1rem 0.3rem;
-            font-family: monospace;
-        }
-        .latex-placeholder {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
-            background: #010409;
-            padding: 0.2rem 0.5rem;
+        
+        .note {
+            background: #1a2530;
+            border-left: 5px solid #4FC3F7;
+            padding: 15px 20px;
+            margin: 25px 0;
             border-radius: 8px;
+            font-size: 15px;
+            color: #b0d0e8;
+        }
+        
+        .formula-block {
+            background: #0f1820;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin: 18px 0;
+            border: 1px solid #223344;
+        }
+        
+        /* MathJax dark mode fix */
+        .MathJax {
+            color: #e0f0ff !important;
         }
     </style>
 </head>
 <body>
-<div class="document-container">
-    <div class="doc-header">
-        <div class="title-area">
-            <h1><i class="fas fa-drafting-compass"></i> Nozzle Design & Flow Analysis</h1>
-            <p>Isentropic expansion · Rao geometry · Performance metrics — complete analytical reference</p>
+    <div class="container">
+        
+        <!-- Header (exactly as you provided) -->
+        <div class="header">
+            <h1>Rocket Nozzle Design</h1>
+            <p>Flow Calculations • Simulation • Geometry</p>
         </div>
-        <div class="version-badge">
-            <i class="fas fa-file-alt"></i> v2.0 · Theoretical Framework
+        
+        <!-- Badges -->
+        <div class="badges">
+            <img src="https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge&logo=python" alt="Python">
+            <img src="https://img.shields.io/badge/Aerospace-Propulsion-black?style=for-the-badge" alt="Aerospace">
+            <img src="https://img.shields.io/badge/Focus-Nozzle%20Design-orange?style=for-the-badge" alt="Nozzle Design">
+            <img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge" alt="Active">
         </div>
-    </div>
-
-    <!-- GIVEN PARAMETERS CARD -->
-    <div class="card">
-        <div class="card-header">
-            <i class="fas fa-chart-simple"></i>
-            <h2>Given Parameters & Variables</h2>
-        </div>
-        <div class="card-body">
-            <div class="parameter-grid">
-                <div class="param-item"><span class="param-name">Thrust (N)</span><span class="param-symbol">\( F \)</span></div>
-                <div class="param-item"><span class="param-name">Chamber Pressure (Pa)</span><span class="param-symbol">\( P_c \)</span></div>
-                <div class="param-item"><span class="param-name">Chamber Temp (K)</span><span class="param-symbol">\( T_c \)</span></div>
-                <div class="param-item"><span class="param-name">Exit Pressure (Pa)</span><span class="param-symbol">\( P_e \)</span></div>
-                <div class="param-item"><span class="param-name">Specific Heat Ratio</span><span class="param-symbol">\( \gamma \)</span></div>
-                <div class="param-item"><span class="param-name">Gas Constant (J/kg·K)</span><span class="param-symbol">\( R \)</span></div>
-            </div>
-            <div class="footnote">
-                <i class="fas fa-info-circle"></i> Stagnation conditions assumed in combustion chamber. Isentropic expansion through converging-diverging nozzle.
-            </div>
-        </div>
-    </div>
-
-    <!-- FLOW & AREA DYNAMICS -->
-    <div class="card">
-        <div class="card-header">
-            <i class="fas fa-waveform"></i>
-            <h2>Flow & Area Dynamics</h2>
-        </div>
-        <div class="card-body">
-            <table class="formula-table">
+        
+        <!-- Main Content -->
+        <div class="content">
+            
+            <h2>Rocket Nozzle Design Calculations</h2>
+            
+            <!-- Given Parameters -->
+            <h3>Given Parameters</h3>
+            <table>
                 <thead>
-                    <tr><th>Metric</th><th>Formula</th></tr>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Variable</th>
+                        <th>Parameter</th>
+                        <th>Variable</th>
+                    </tr>
                 </thead>
                 <tbody>
-                    <tr><td>Exit Velocity \( V_e \)</td><td>\( \displaystyle V_e = \sqrt{\frac{2\gamma}{\gamma - 1} \cdot R T_c \cdot \left(1 - \left(\frac{P_e}{P_c}\right)^{\frac{\gamma - 1}{\gamma}}\right)} \)</td></tr>
-                    <tr><td>Exit Mach Number \( M_e \)</td><td>\( \displaystyle M_e = \sqrt{\frac{2}{\gamma - 1} \left[ \left(\frac{P_c}{P_e}\right)^{\frac{\gamma - 1}{\gamma}} - 1 \right]} \)</td></tr>
-                    <tr><td>Mass Flow Rate \( \dot{m} \)</td><td>\( \displaystyle \dot{m} = \frac{F}{V_e} \) (approximation) or via choked condition</td></tr>
-                    <tr><td>Area Ratio \( \frac{A_e}{A_t} \)</td><td>\( \displaystyle \frac{A_e}{A_t} = \frac{1}{M_e} \left[ \frac{1 + \frac{\gamma - 1}{2} M_e^2}{\frac{\gamma + 1}{2}} \right]^{\frac{\gamma + 1}{2(\gamma - 1)}} \)</td></tr>
-                    <tr><td>Throat Area \( A_t \)</td><td>\( \displaystyle A_t = \frac{\dot{m}}{P_c} \cdot \sqrt{\frac{R T_c}{\gamma} \cdot \left(\frac{\gamma + 1}{2}\right)^{\frac{\gamma + 1}{2(\gamma - 1)}}} \)</td></tr>
-                    <tr><td>Exit Area \( A_e \)</td><td>\( A_e = A_t \cdot \frac{A_e}{A_t} \)</td></tr>
-                    <tr><td>Throat Diameter \( d_t \)</td><td>\( d_t = \sqrt{\frac{4A_t}{\pi}} \)</td></tr>
-                    <tr><td>Exit Diameter \( d_e \)</td><td>\( d_e = \sqrt{\frac{4A_e}{\pi}} \)</td></tr>
+                    <tr>
+                        <td><strong>Thrust (N)</strong></td>
+                        <td>\( F \)</td>
+                        <td><strong>Chamber Temp (K)</strong></td>
+                        <td>\( T_c \)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Chamber Pressure (Pa)</strong></td>
+                        <td>\( P_c \)</td>
+                        <td><strong>Specific Heat Ratio</strong></td>
+                        <td>\( \gamma \)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Exit Pressure (Pa)</strong></td>
+                        <td>\( P_e \)</td>
+                        <td><strong>Gas Constant (J/kg·K)</strong></td>
+                        <td>\( R \)</td>
+                    </tr>
                 </tbody>
             </table>
-        </div>
-    </div>
-
-    <!-- GEOMETRY & STRUCTURAL DESIGN -->
-    <div class="card">
-        <div class="card-header">
-            <i class="fas fa-cube"></i>
-            <h2>Geometry & Structural Sizing</h2>
-        </div>
-        <div class="card-body">
-            <table class="formula-table">
-                <thead><tr><th>Metric</th><th>Formula</th></tr></thead>
+            
+            <!-- Flow & Area Dynamics -->
+            <h3>Flow &amp; Area Dynamics</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Formula</th>
+                        <th>Metric</th>
+                        <th>Formula</th>
+                    </tr>
+                </thead>
                 <tbody>
-                    <tr><td>Chamber Diameter</td><td>\( d_c = 3 d_t \)</td></tr>
-                    <tr><td>Convergent Length</td><td>\( L_{conv} = \frac{d_c - d_t}{2 \tan(\alpha)} \) &nbsp; (α half-angle, typical 45°)</td></tr>
-                    <tr><td>Divergent Length</td><td>\( L_{div} = \frac{d_e - d_t}{2 \tan(\beta)} \) &nbsp; (β half-angle, ~15° for bell)</td></tr>
-                    <tr><td>Chamber Length (L*)</td><td>\( L_c = \frac{L^* \cdot A_t}{A_c} \) &nbsp; where L* characteristic length</td></tr>
-                    <tr><td>Wall Thickness (simple)</td><td>\( t_w = \frac{P_c \cdot d_c}{16000} \) (empirical, mm)</td></tr>
-                    <tr><td>Stress Check</td><td>\( \sigma = \frac{P_c \cdot d_c}{2 t_w} \)</td></tr>
-                    <tr><td>Design Thickness (safety)</td><td>\( t = \frac{P_c \cdot d_c \cdot SF}{2 \sigma_{yield}} \)</td></tr>
+                    <tr>
+                        <td><strong>Exit Velocity</strong></td>
+                        <td class="math">\[
+                            V_e = \sqrt{\frac{2\gamma}{\gamma - 1} \cdot R T_c \cdot \left(1 - \left(\frac{P_e}{P_c}\right)^{\frac{\gamma - 1}{\gamma}}\right)}
+                        \]</td>
+                        <td><strong>Exit Mach No.</strong></td>
+                        <td class="math">\[
+                            M_e = \sqrt{\frac{2}{\gamma - 1} \left[ \left(\frac{P_c}{P_e}\right)^{\frac{\gamma - 1}{\gamma}} - 1 \right]}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mass Flow Rate</strong></td>
+                        <td class="math">\[
+                            \dot{m} = \frac{F}{V_e}
+                        \]</td>
+                        <td><strong>Area Ratio</strong></td>
+                        <td class="math">\[
+                            \frac{A_e}{A_t} = \frac{1}{M_e} \left[ \frac{1 + \frac{\gamma - 1}{2} M_e^2}{\frac{\gamma + 1}{2}} \right]^{\frac{\gamma + 1}{2(\gamma - 1)}}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Throat Area</strong></td>
+                        <td class="math">\[
+                            A_t = \frac{\dot{m}}{P_c} \cdot \sqrt{\frac{R T_c}{\gamma} \cdot \left(\frac{\gamma + 1}{2}\right)^{\frac{\gamma + 1}{2(\gamma - 1)}}}
+                        \]</td>
+                        <td><strong>Exit Area</strong></td>
+                        <td class="math">\[
+                            A_e = A_t \cdot \frac{A_e}{A_t}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Throat Diameter</strong></td>
+                        <td class="math">\[
+                            d_t = \sqrt{\frac{4A_t}{\pi}}
+                        \]</td>
+                        <td><strong>Exit Diameter</strong></td>
+                        <td class="math">\[
+                            d_e = \sqrt{\frac{4A_e}{\pi}}
+                        \]</td>
+                    </tr>
                 </tbody>
             </table>
-            <div class="subsection-title"><i class="fas fa-ruler"></i> Bell Nozzle (Rao Method) constants</div>
-            <div class="parameter-grid" style="margin-top: 0;">
-                <div class="param-item"><span>Throat radius</span><span>\( r_t = d_t / 2 \)</span></div>
-                <div class="param-item"><span>Expansion ratio ε</span><span>\( \epsilon = A_e / A_t \)</span></div>
-                <div class="param-item"><span>Throat arc R₁</span><span>\( R_1 = 0.382 \, r_t \)</span></div>
-                <div class="param-item"><span>Convergent angle θ</span><span>\( 25^\circ \) (typical)</span></div>
-                <div class="param-item"><span>Exit angle θₑ</span><span>\( 8.5^\circ \) (Rao optimum)</span></div>
-                <div class="param-item"><span>Start angle θₙ</span><span>\( 30^\circ \)</span></div>
-            </div>
-            <div class="latex-placeholder" style="margin-top: 0.8rem;">
-                <i class="fas fa-chart-line"></i> <strong>Parabolic Bell Contour:</strong> \( r(x) = y_n + \tan(\theta_n)(x - x_n) + \frac{\tan(\theta_e) - \tan(\theta_n)}{2(L - x_n)} (x - x_n)^2 \)
-            </div>
-        </div>
-    </div>
-
-    <!-- NOZZLE FLOW & PERFORMANCE (ANALYTICAL) -->
-    <div class="card">
-        <div class="card-header">
-            <i class="fas fa-chart-line"></i>
-            <h2>Nozzle Flow & Performance Analysis</h2>
-        </div>
-        <div class="card-body">
-            <div class="subsection-title">1. Mach & Area Relations</div>
-            <table class="formula-table">
-                <tr><th>Exit Mach \( M_e \)</th><td>\( M_e = \sqrt{\frac{2}{\gamma - 1} \left[\left(\frac{P_c}{P_e}\right)^{\frac{\gamma - 1}{\gamma}} - 1\right]} \)</td></tr>
-                <tr><th>Area Ratio \( \epsilon \)</th><td>\( \frac{A_e}{A_t} = \left(\frac{\gamma+1}{2}\right)^{-\frac{\gamma+1}{2(\gamma-1)}} \cdot \frac{\left(1 + \frac{\gamma-1}{2} M_e^2\right)^{\frac{\gamma+1}{2(\gamma-1)}}}{M_e} \)</td></tr>
-            </table>
-
-            <div class="subsection-title">2. Mass Flow Rate \( \dot{m} \)</div>
-            <table class="formula-table">
-                <tr><th>General Flow</th><td>\( \dot{m}_g = \frac{A_t P_c}{\sqrt{T_c}} \sqrt{\frac{\gamma}{R}} \cdot \left[M_e \left(1 + \frac{\gamma - 1}{2} M_e^2\right)^{-\frac{\gamma + 1}{2(\gamma - 1)}}\right] \)</td></tr>
-                <tr><th>Choked Flow (throat)</th><td>\( \dot{m}_c = \frac{A_t P_c}{\sqrt{T_c}} \sqrt{\frac{\gamma}{R}} \cdot \left(\frac{\gamma + 1}{2}\right)^{-\frac{\gamma + 1}{2(\gamma - 1)}} \)</td></tr>
-                <tr><th>Continuity</th><td>\( \dot{m} = \rho_t \cdot V_t \cdot A_t \)</td></tr>
-            </table>
-
-            <div class="subsection-title">3. Thermodynamic Properties (Stagnation & Throat)</div>
-            <table class="formula-table">
-                <tr><th>Chamber density \( \rho_0 \)</th><td>\( \rho_0 = \frac{P_c}{R T_c} \)</td></tr>
-                <tr><th>Throat velocity \( V_t \)</th><td>\( V_t = \sqrt{\frac{2 \gamma R T_c}{\gamma + 1}} \)</td></tr>
-                <tr><th>Throat density \( \rho_t \)</th><td>\( \rho_t = \rho_0 \left(\frac{2}{\gamma+1}\right)^{\frac{1}{\gamma-1}} \)</td></tr>
-            </table>
-
-            <div class="subsection-title">4. Exit Plane Properties</div>
-            <table class="formula-table">
-                <tr><th>Exit Pressure</th><td>\( P_e = P_c \left(1 + \frac{\gamma - 1}{2} M_e^2\right)^{-\frac{\gamma}{\gamma-1}} \)</td></tr>
-                <tr><th>Exit Temperature</th><td>\( T_e = T_c \left(1 + \frac{\gamma - 1}{2} M_e^2\right)^{-1} \)</td></tr>
-                <tr><th>Exit Velocity</th><td>\( V_e = M_e \sqrt{\gamma R T_e} \)</td></tr>
-            </table>
-
-            <div class="subsection-title">5. Performance Metrics</div>
-            <table class="formula-table">
-                <tr><th>Total Thrust \( F \)</th><td>\( F = \dot{m} V_e + (P_e - P_a) A_e \) &nbsp;&nbsp; (\(P_a\) = ambient pressure)</td></tr>
-                <tr><th>Specific Impulse \( I_{sp} \)</th><td>\( I_{sp} = \frac{V_e}{g} \) &nbsp; (vacuum) ; &nbsp; \( I_{sp} = \frac{F}{\dot{m} g_0} \) (sea-level)</td></tr>
-            </table>
-            <div class="footnote">
-                <i class="fas fa-flask"></i> Isentropic expansion assumed. For overexpanded/underexpanded conditions, shock losses may occur.
-            </div>
-        </div>
-    </div>
-
-    <!-- RAO BELL NOZZLE GEOMETRY (DETAILED) -->
-    <div class="card">
-        <div class="card-header">
-            <i class="fas fa-chart-area"></i>
-            <h2>Bell Nozzle Geometry — Rao Method</h2>
-        </div>
-        <div class="card-body">
-            <table class="formula-table">
-                <thead><tr><th>Quantity</th><th>Formula / Value</th></tr></thead>
+            
+            <!-- Geometry & Structural Design -->
+            <h3>Geometry &amp; Structural Design</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Formula</th>
+                        <th>Metric</th>
+                        <th>Formula</th>
+                    </tr>
+                </thead>
                 <tbody>
-                    <tr><td>Throat radius \( r_t \)</td><td>\( r_t = d_t / 2 \)</td></tr>
-                    <tr><td>Expansion ratio \( \epsilon \)</td><td>\( \epsilon = A_e / A_t \)</td></tr>
-                    <tr><td>Throat arc radius \( R_1 \)</td><td>\( R_1 = 0.382 \, r_t \)</td></tr>
-                    <tr><td>Coordinates at point N</td><td>\( x_n = R_1 \sin \theta_n ,\quad y_n = r_t + R_1 (1 - \cos \theta_n) \)</td></tr>
-                    <tr><td>Convergent angle \( \theta \)</td><td>\( 25^\circ \) (typical) , start angle \( \theta_n = 30^\circ \)</td></tr>
-                    <tr><td>Exit angle \( \theta_e \)</td><td>\( 8.5^\circ \) (optimum for short bell)</td></tr>
-                    <tr><td>Rao length approximation</td><td>\( L = f \cdot \frac{r_t}{\tan(15^\circ)} \left[ \sqrt{\epsilon - 1} + 1.5 \left(\frac{1}{\cos(15^\circ)} - 1\right) \right] \) &nbsp; (f ~ 0.8)</td></tr>
+                    <tr>
+                        <td><strong>Chamber Diameter</strong></td>
+                        <td class="math">\[
+                            d_c = 3 d_t
+                        \]</td>
+                        <td><strong>Convergent Length</strong></td>
+                        <td class="math">\[
+                            L_{conv} = \frac{d_c - d_t}{2 \tan(\alpha)}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Chamber Area</strong></td>
+                        <td class="math">\[
+                            A_c = \frac{\pi d_c^2}{4}
+                        \]</td>
+                        <td><strong>Divergent Length</strong></td>
+                        <td class="math">\[
+                            L_{div} = \frac{d_e - d_t}{2 \tan(\beta)}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Chamber Length</strong></td>
+                        <td class="math">\[
+                            L_c = \frac{L^* \cdot A_t}{A_c}
+                        \]</td>
+                        <td><strong>Total Length</strong></td>
+                        <td class="math">\[
+                            L_{total} = L_c + L_{conv} + L_{div}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Wall Thickness</strong></td>
+                        <td class="math">\[
+                            t_w = \frac{P_c \cdot d_c}{16000}
+                        \]</td>
+                        <td><strong>Stress Check</strong></td>
+                        <td class="math">\[
+                            \sigma = \frac{P_c \cdot d_c}{2 t_w}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Design Thickness</strong></td>
+                        <td class="math">\[
+                            t = \frac{P_c \cdot d_c \cdot SF}{2 \sigma_{yield}}
+                        \]</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
                 </tbody>
             </table>
-            <div class="latex-placeholder" style="margin: 1rem 0;">
-                <strong>Parabolic contour equation:</strong> \( r(x) = y_n + \tan(\theta_n)(x - x_n) + \frac{\tan(\theta_e) - \tan(\theta_n)}{2(L - x_n)} (x - x_n)^2 \) <br>
-                Boundary conditions: \( r(x_n)=y_n,\; r'(x_n)=\tan\theta_n,\; r(L)=r_e,\; r'(L)=\tan\theta_e \)
+            
+            <div class="note">
+                <strong>Note:</strong> All formulas assume isentropic, one-dimensional, ideal-gas flow. Ambient pressure \( P_a \) is used in thrust calculation when nozzle is not perfectly expanded.
             </div>
-            <div class="footnote">
-                <i class="fas fa-drafting-compass"></i> Rao method provides a high-performance parabolic contour with minimized length while preserving thrust efficiency.
+            
+            <!-- Nozzle Flow & Performance Analysis -->
+            <h2>Nozzle Flow &amp; Performance Analysis</h2>
+            <p style="color:#b0d0e8; margin-bottom: 25px;">Analytical Framework for Isentropic Expansion</p>
+            
+            <!-- 1. Mach & Area Relations -->
+            <h3>1. Mach &amp; Area Relations</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Formula</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Exit Mach (\( M_e \))</strong></td>
+                        <td class="math">\[
+                            M_e = \sqrt{\frac{2}{\gamma - 1} \left[\left(\frac{P_c}{P_e}\right)^{\frac{\gamma - 1}{\gamma}} - 1\right]}
+                        \]</td>
+                        <td>Mach number at the exit plane.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Area Ratio (\( \epsilon \))</strong></td>
+                        <td class="math">\[
+                            \frac{A_e}{A_t} = \left(\frac{\gamma+1}{2}\right)^{-\frac{\gamma+1}{2(\gamma-1)}} \cdot \frac{\left(1 + \frac{\gamma-1}{2} M_e^2\right)^{\frac{\gamma+1}{2(\gamma-1)}}}{M_e}
+                        \]</td>
+                        <td>Ratio of exit area to throat area.</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 2. Mass Flow Rates -->
+            <h3>2. Mass Flow Rates (\( \dot{m} \))</h3>
+            <div class="formula-block">
+                <p><strong>General Flow:</strong></p>
+                <div class="math">\[
+                    \dot{m}_g = \frac{A_t P_c}{\sqrt{T_c}} \sqrt{\frac{\gamma}{R}} \cdot \left[M_e \left(1 + \frac{\gamma - 1}{2} M_e^2\right)^{-\frac{\gamma + 1}{2(\gamma - 1)}}\right]
+                \]</div>
             </div>
+            <div class="formula-block">
+                <p><strong>Choked Flow:</strong></p>
+                <div class="math">\[
+                    \dot{m}_c = \frac{A_t P_c}{\sqrt{T_c}} \sqrt{\frac{\gamma}{R}} \cdot \left(\frac{\gamma + 1}{2}\right)^{-\frac{\gamma + 1}{2(\gamma - 1)}}
+                \]</div>
+            </div>
+            <div class="formula-block">
+                <p><strong>Continuity Equation:</strong></p>
+                <div class="math">\[
+                    \dot{m} = \rho_t \cdot V_t \cdot A_t
+                \]</div>
+            </div>
+            
+            <!-- 3. Thermodynamic Properties -->
+            <h3>3. Thermodynamic Properties</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Location</th>
+                        <th>Quantity</th>
+                        <th>Formula</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Chamber</td>
+                        <td><strong>Stagnation Density</strong></td>
+                        <td class="math">\[
+                            \rho_0 = \frac{P_c}{R T_c}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td>Throat</td>
+                        <td><strong>Velocity (\( V_t \))</strong></td>
+                        <td class="math">\[
+                            V_t = \sqrt{\frac{2 \gamma R T_c}{\gamma + 1}}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td>Throat</td>
+                        <td><strong>Density (\( \rho_t \))</strong></td>
+                        <td class="math">\[
+                            \rho_t = \rho_0 \left(\frac{2}{\gamma+1}\right)^{\frac{1}{\gamma-1}}
+                        \]</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 4. Exit Plane Properties -->
+            <h3>4. Exit Plane Properties</h3>
+            <div class="formula-block">
+                <p><strong>Exit Pressure (\( P_e \)):</strong></p>
+                <div class="math">\[
+                    P_e = P_c \left(1 + \frac{\gamma - 1}{2} M_e^2\right)^{-\frac{\gamma}{\gamma-1}}
+                \]</div>
+            </div>
+            <div class="formula-block">
+                <p><strong>Exit Temperature (\( T_e \)):</strong></p>
+                <div class="math">\[
+                    T_e = T_c \left(1 + \frac{\gamma - 1}{2} M_e^2\right)^{-1}
+                \]</div>
+            </div>
+            <div class="formula-block">
+                <p><strong>Exit Velocity (\( V_e \)):</strong></p>
+                <div class="math">\[
+                    V_e = M_e \sqrt{\gamma R T_e}
+                \]</div>
+            </div>
+            
+            <!-- 5. Performance Metrics -->
+            <h3>5. Performance Metrics</h3>
+            <div class="formula-block">
+                <p><strong>Total Thrust (\( F \)):</strong></p>
+                <div class="math">\[
+                    F = \dot{m} V_e + (P_e - P_a) A_e
+                \]</div>
+                <p style="font-size:14px; margin-top:8px; color:#aaa;">Where \( P_a \) is the ambient atmospheric pressure.</p>
+            </div>
+            <div class="formula-block">
+                <p><strong>Specific Impulse (\( I_{sp} \)):</strong></p>
+                <div class="math">\[
+                    I_{sp} = \frac{V_e}{g}
+                \]</div>
+            </div>
+            
+            <!-- Bell Nozzle Geometry (Rao Method) -->
+            <h2>Bell Nozzle Geometry (Rao Method)</h2>
+            
+            <!-- 1. Geometric Constants & Point N -->
+            <h3>1. Geometric Constants &amp; Point N</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Quantity</th>
+                        <th>Formula</th>
+                        <th>Quantity</th>
+                        <th>Formula</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Throat Radius</strong></td>
+                        <td class="math">\[
+                            r_t = \frac{d_t}{2}
+                        \]</td>
+                        <td><strong>Expansion Ratio</strong></td>
+                        <td class="math">\[
+                            \epsilon = \frac{A_e}{A_t}
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Exit Radius</strong></td>
+                        <td class="math">\[
+                            r_e = \frac{d_e}{2}
+                        \]</td>
+                        <td><strong>Throat Arc \( R_1 \)</strong></td>
+                        <td class="math">\( R_1 = 0.382 \, r_t \)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>X-Coord at N</strong></td>
+                        <td class="math">\[
+                            x_n = R_1 \sin \theta_n
+                        \]</td>
+                        <td><strong>Y-Coord at N</strong></td>
+                        <td class="math">\[
+                            y_n = r_t + R_1 (1 - \cos \theta_n)
+                        \]</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 2. Convergent & Bell Angles -->
+            <h3>2. Convergent &amp; Bell Angles</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Quantity</th>
+                        <th>Formula / Value</th>
+                        <th>Quantity</th>
+                        <th>Formula / Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Conv. Angle \( \theta \)</strong></td>
+                        <td>\( 25^\circ \)</td>
+                        <td><strong>Arc Radius \( R_c \)</strong></td>
+                        <td class="math">\( R_c = 1.5 \, r_t \)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Start Angle \( \theta_n \)</strong></td>
+                        <td>\( 30^\circ \)</td>
+                        <td><strong>Arc End Rad \( r_n \)</strong></td>
+                        <td class="math">\[
+                            r_n = r_t + R_c (1 - \cos \theta)
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Exit Angle \( \theta_e \)</strong></td>
+                        <td>\( 8.5^\circ \)</td>
+                        <td><strong>Arc Length \( l_1 \)</strong></td>
+                        <td class="math">\[
+                            l_1 = R_c \sin \theta
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Conical Length \( l_n \)</strong></td>
+                        <td class="math">\[
+                            l_n = \frac{r_t(\sqrt{\epsilon}-1) + R_c(\cos\theta - 1)}{\tan\theta}
+                        \]</td>
+                        <td><strong>Fractional Len \( f \)</strong></td>
+                        <td>User Defined (e.g. 0.8)</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 3. Core Design Equations -->
+            <h3>3. Core Design Equations</h3>
+            <div class="formula-block">
+                <p><strong>Nozzle Length (Rao Approximation):</strong></p>
+                <div class="math">\[
+                    L = f \cdot \frac{r_t}{\tan(15^\circ)} \left[ \sqrt{\epsilon - 1} + 1.5 \left(\frac{1}{\cos(15^\circ)} - 1\right) \right]
+                \]</div>
+            </div>
+            <div class="formula-block">
+                <p><strong>Parabolic Bell Contour Equation:</strong></p>
+                <div class="math">\[
+                    r(x) = y_n + \tan(\theta_n)(x - x_n) + \frac{\tan(\theta_e) - \tan(\theta_n)}{2(L - x_n)} (x - x_n)^2
+                \]</div>
+            </div>
+            
+            <!-- 4. Boundary Conditions -->
+            <h3>4. Boundary Conditions</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Condition</th>
+                        <th>Formula</th>
+                        <th>Condition</th>
+                        <th>Formula</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Radius at N</strong></td>
+                        <td class="math">\[
+                            r(x_n) = y_n
+                        \]</td>
+                        <td><strong>Slope at N</strong></td>
+                        <td class="math">\[
+                            \left.\frac{dr}{dx}\right|_{x_n} = \tan(\theta_n)
+                        \]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Radius at Exit</strong></td>
+                        <td class="math">\[
+                            r(L) = r_e
+                        \]</td>
+                        <td><strong>Slope at Exit</strong></td>
+                        <td class="math">\[
+                            \left.\frac{dr}{dx}\right|_{L} = \tan(\theta_e)
+                        \]</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div style="text-align: center; margin-top: 60px; color: #4a6b7f; font-size: 14px;">
+                Rocket Nozzle Design Calculations • Purely analytical reference sheet
+            </div>
+            
         </div>
     </div>
-
-    <!-- ADDITIONAL NOTES: SAMPLE RESULTS REFERENCE (from image) -->
-    <div class="card">
-        <div class="card-header">
-            <i class="fas fa-chart-bar"></i>
-            <h2>Simulation Output Example (Illustrative)</h2>
-        </div>
-        <div class="card-body">
-            <div style="display: flex; flex-wrap: wrap; gap: 2rem; justify-content: space-between;">
-                <div>
-                    <h4 style="color:#7aaef5;">Thermal Analysis</h4>
-                    <table class="formula-table" style="width: auto;">
-                        <tr><th>Chamber temp Tc</th><td>223.29 K</td></tr>
-                        <tr><th>Exit temperature Te</th><td>1278.79 K</td></tr>
-                        <tr><th>Throat velocity vt</th><td>972.79 m/s</td></tr>
-                        <tr><th>Exit pressure pe</th><td>26516.21 Pa</td></tr>
-                    </table>
-                </div>
-                <div>
-                    <h4 style="color:#7aaef5;">Flow Analysis</h4>
-                    <table class="formula-table" style="width: auto;">
-                        <tr><th>Nozzle Area Ratio</th><td>12.47</td></tr>
-                        <tr><th>Exit Mach Me</th><td>3.50</td></tr>
-                        <tr><th>Exit Velocity</th><td>2340.68 m/s</td></tr>
-                        <tr><th>Specific impulse</th><td>238.68 s</td></tr>
-                        <tr><th>Mass Flow Rate</th><td>0.43 kg/s</td></tr>
-                    </table>
-                </div>
-                <div>
-                    <h4 style="color:#7aaef5;">Geometry summary</h4>
-                    <table class="formula-table" style="width: auto;">
-                        <tr><th>Throat diameter</th><td>16.1 mm</td></tr>
-                        <tr><th>Exit diameter</th><td>56.7 mm</td></tr>
-                        <tr><th>Final Thrust</th><td>1000.0 N</td></tr>
-                    </table>
-                </div>
-            </div>
-            <div class="footnote" style="margin-top: 1rem;">
-                <i class="fas fa-microchip"></i> Wall material analysis & thermal mapping not yet configured in this build — reference data from isentropic simulation.
-            </div>
-        </div>
-    </div>
-
-    <!-- FOOTER / DISCLAIMER -->
-    <div style="text-align: center; font-size: 0.7rem; color: #5a6e93; margin-top: 1.5rem; border-top: 1px solid #1f253c; padding-top: 1.5rem;">
-        <i class="fas fa-rocket"></i> Analytical design framework based on isentropic flow & Rao's parabolic approximation. All equations follow standard rocket propulsion theory (Sutton, Huzel & Huang). 
-        <br>© Nozzle Design Reference | Valid for perfect gas, frozen flow assumptions.
-    </div>
-</div>
+    
+    <script>
+        // Optional: Force MathJax re-render after page load (helps with dynamic content)
+        window.onload = function() {
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise().catch(function(err) {
+                    console.log('MathJax typeset error:', err);
+                });
+            }
+        };
+    </script>
 </body>
 </html>

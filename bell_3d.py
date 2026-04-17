@@ -131,10 +131,10 @@ def bell_3d(r1, cl, cr, con_l, e, rt, re, l1, Re, rn, ln, r_start, r_exit, slope
     save_path = "static"
     os.makedirs(save_path, exist_ok=True)
 
-    file_path = os.path.join(save_path, "3D-Bell_nozzle.png")
+    file_path = os.path.join(save_path, "out/3D-Bell_nozzle.png")
     plt.savefig(file_path, dpi=300, bbox_inches='tight')
     
     plt.close()
     
 
-    return "/static/3D-Bell_nozzle.png"
+    return "/static/out/3D-Bell_nozzle.png"

@@ -166,9 +166,9 @@ def bell_cfd(r1, cl, cr, con_l, e, rt, re, l1, Re, rn, ln, r_start, r_exit, slop
     save_path = "static"
     os.makedirs(save_path, exist_ok=True)
 
-    file_path = os.path.join(save_path, "Bell_CDF.png")
+    file_path = os.path.join(save_path, "out/Bell_CDF.png")
     plt.savefig(file_path, dpi=300, bbox_inches='tight')
 
     plt.close()
 
-    return "/static/Bell_CDF.png"
+    return "/static/out/Bell_CDF.png"

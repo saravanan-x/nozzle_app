@@ -264,7 +264,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--ui); font-s
 }
 
 
-    /* ===== FORMULAS MODAL STYLES ===== */
+   
     #formulasModal {
         display: none;
         position: fixed;
